@@ -1,1 +1,18 @@
 @import "tailwindcss";
+:root {
+    --input-border: #008D36;
+    --input-bg: #EDFFF4;
+  }
+.input-style {
+    border-color: var(--input-border);
+    background-color: var(--input-bg);
+  }
+.text-style {
+    color: var(--input-border);
+  }
+.bg-style {
+    background-color: var(--input-bg);
+  }  
+.bgInput {
+    background-color: var(--input-border);
+  }  
