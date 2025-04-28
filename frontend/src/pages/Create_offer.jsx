@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import axios from 'axios';
 import Experience from '../components/offer_components/Experience';
 import Skills from '../components/offer_components/Skills';
 import Language from '../components/offer_components/Language';
@@ -8,24 +9,92 @@ import Requirements from '../components/offer_components/Requirements';
 import UploadCV from '../components/UploadCV';
 
 export default function JobPostingForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  const onSubmit = (data) => {
-    const formData = new FormData();
-    
-    Object.keys(data).forEach(key => {
-      if (key !== 'cvFiles') {
-        formData.append(key, data[key]);
-      }
+  // Modify the onSubmit function in Create_offer.jsx
+// Modify the onSubmit function in Create_offer.jsx
+const onSubmit = async (data) => {
+  try {
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    // Convert files to base64
+    const filePromises = selectedFiles.map(file => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64Data = reader.result.split(',')[1];
+          resolve({
+            filename: file.name,
+            content: base64Data,
+            type: file.type
+          });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     });
-    
-    selectedFiles.forEach((file, index) => {
-      formData.append(`cv${index}`, file);
+
+    const cvFiles = await Promise.all(filePromises);
+
+    // Process requirements, experience, and skills arrays
+    const processArray = (str, separator) => {
+      if (!str || str.trim() === '') return [];
+      return str.split(separator)
+        .map(item => item.trim())
+        .filter(item => item !== '' && item !== '•');
+    };
+
+    // Get form data from formState
+    const formData = {
+      jobTitle: data.jobTitle,
+      location: data.location,
+      positions: parseInt(data.positions),
+      yearsOfExperience: parseInt(data.yearsOfExperience),
+      education: data.education,
+      requirements: processArray(data.requirements, '\\n'),
+      experienceDetails: processArray(data.experienceDetails, '\\n'),
+      skills: processArray(data.skills, ','),
+      languages: processArray(data.languages, ','),
+      weights: {
+        experience: parseInt(data.experienceWeight) || 0,
+        jobDescription: parseInt(data.jobDescriptionWeight) || 0,
+        education: parseInt(data.educationWeight) || 0,
+        skills: parseInt(data.skillsWeight) || 0
+      },
+      cvFiles: cvFiles
+    };
+
+    console.log("Final form data:", formData);
+
+    // Make the API call
+    const response = await axios.post('http://localhost:5000/api/job-offers', formData, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      timeout: 5000,
+      validateStatus: status => status >= 200 && status < 300
     });
-    
-    console.log('Selected files:', selectedFiles);
-  };
+
+    if (response.data.success) {
+      alert('Job offer created successfully!');
+      setSelectedFiles([]);
+    } else {
+      setSubmitError('Failed to create job offer. Please try again.');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    setSubmitError('Failed to submit the form. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
@@ -76,10 +145,10 @@ export default function JobPostingForm() {
           </div>
 
           {/* Requirements Component */}
-          <Requirements register={register} />
+          <Requirements register={register}  setValue={setValue}/>
 
           {/* Experience Component */}
-          <Experience register={register} errors={errors} />
+          <Experience register={register} errors={errors} setValue={setValue} />
 
           {/* Education */}
           <div className="mb-4">
@@ -94,13 +163,18 @@ export default function JobPostingForm() {
           </div>
 
           {/* Skills Component */}
-          <Skills register={register} />
+          <Skills register={register} setValue={setValue} />
+
 
           {/* Language Component */}
-          <Language register={register} />
+          <Language register={register} setValue={setValue} />
 
           {/* Weights Component */}
-          <Weights />
+          <Weights 
+            register={register} 
+            setValue={setValue}
+            watch={watch}
+          />
 
           {/* Upload CV Component */}
           <UploadCV selectedFiles={selectedFiles} setSelectedFiles={setSelectedFiles} />
@@ -110,10 +184,12 @@ export default function JobPostingForm() {
             <button
               type="submit"
               className="px-6 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+              disabled={isSubmitting}
             >
-              Submit Form
+              {isSubmitting ? 'Submitting...' : 'Submit Form'}
             </button>
           </div>
+          {submitError && <p className="text-red-500 text-xs mt-1 text-center">{submitError}</p>}
         </form>
       </div>
     </div>

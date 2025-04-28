@@ -1,13 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const Language = ({ register }) => {
+const Language = ({ register , setValue}) => {
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   const allLanguages = [
-    "Arabic", "French", "English", "Spanish", "German",
-    "Italian", "Portuguese", "Russian", "Chinese", "Japanese"
-  ];
+    // Official UN Languages
+    "Arabic", "Chinese", "English", "French", "Russian", "Spanish",
+    
+    // European Languages
+    "Albanian", "Armenian", "Basque", "Belarusian", "Bosnian", "Bulgarian", 
+    "Catalan", "Croatian", "Czech", "Danish", "Dutch", "Estonian", "Finnish", 
+    "Galician", "Georgian", "German", "Greek", "Hungarian", "Icelandic", "Irish",
+    "Italian", "Latvian", "Lithuanian", "Luxembourgish", "Macedonian", "Maltese",
+    "Moldovan", "Norwegian", "Polish", "Portuguese", "Romanian", "Serbian", 
+    "Slovak", "Slovenian", "Swedish", "Ukrainian",
+    
+    // Asian Languages
+    "Bengali", "Burmese", "Filipino", "Hindi", "Indonesian", "Japanese", 
+    "Javanese", "Kazakh", "Khmer", "Korean", "Lao", "Malay", "Mongolian", 
+    "Nepali", "Pashto", "Persian", "Punjabi", "Sinhalese", "Tajik", "Tamil", 
+    "Telugu", "Thai", "Turkish", "Urdu", "Uzbek", "Vietnamese",
+    
+    // African Languages
+    "Afrikaans", "Amharic", "Hausa", "Igbo", "Malagasy", "Oromo", "Somali", 
+    "Swahili", "Tigrinya", "Xhosa", "Yoruba", "Zulu",
+    
+    // Middle Eastern Languages
+    "Hebrew", "Kurdish",
+    
+    // Other Major Languages
+    "Esperanto", "Latin", "Sanskrit"
+  ].sort();
+
+  // Update the hidden input whenever selectedLanguages changes
+  useEffect(() => {
+    const value = selectedLanguages.length > 0 ? selectedLanguages.join(',') : '';
+    setValue('languages', value);
+  }, [selectedLanguages, setValue]);
 
   return (
     <div className="mb-4">
@@ -69,7 +99,6 @@ const Language = ({ register }) => {
       <input 
         type="hidden" 
         {...register("languages")} 
-        value={selectedLanguages.join(',')} 
       />
     </div>
   );

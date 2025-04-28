@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const Skills = ({ register }) => {
+const Skills = ({ register, setValue }) => {
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [skillSearchTerm, setSkillSearchTerm] = useState('');
+  const [showAddCustom, setShowAddCustom] = useState(false);
 
   const allSkills = [
     "JavaScript", "React", "Node.js", "Python", "Java", "C++", "SQL",
@@ -10,6 +11,36 @@ const Skills = ({ register }) => {
     "Agile/Scrum", "Project Management", "Data Analysis",
     "Machine Learning", "DevOps", "Communication", "Leadership"
   ];
+
+  // Update the hidden input whenever selectedSkills changes
+  useEffect(() => {
+    const value = selectedSkills.length > 0 ? selectedSkills.join(',') : '';
+    setValue('skills', value);
+  }, [selectedSkills, setValue]);
+
+  // Handle key press to add custom skill
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && skillSearchTerm.trim() !== '') {
+      e.preventDefault();
+      addCustomSkill();
+    }
+  };
+
+  // Add custom skill function
+  const addCustomSkill = () => {
+    const trimmedSkill = skillSearchTerm.trim();
+    if (trimmedSkill && !selectedSkills.includes(trimmedSkill)) {
+      setSelectedSkills([...selectedSkills, trimmedSkill]);
+      setSkillSearchTerm('');
+      setShowAddCustom(false);
+    }
+  };
+
+  // Filter skills based on search term
+  const filteredSkills = allSkills.filter(
+    skill => !selectedSkills.includes(skill) && 
+    skill.toLowerCase().includes(skillSearchTerm.toLowerCase())
+  );
 
   return (
     <div className="mb-4">
@@ -19,9 +50,13 @@ const Skills = ({ register }) => {
           <input
             type="text"
             className="w-full p-3 border rounded-3xl input-style pr-10"
-            placeholder="Search skills..."
+            placeholder="Search skills or type to add custom skill..."
             value={skillSearchTerm}
-            onChange={(e) => setSkillSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSkillSearchTerm(e.target.value);
+              setShowAddCustom(e.target.value.trim() !== '');
+            }}
+            onKeyPress={handleKeyPress}
           />
           <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -32,21 +67,45 @@ const Skills = ({ register }) => {
         
         {skillSearchTerm && (
           <div className="max-h-40 overflow-y-auto border input-style rounded-2xl bg-white shadow-md absolute w-full z-10">
-            {allSkills
-              .filter(skill => !selectedSkills.includes(skill) && skill.toLowerCase().includes(skillSearchTerm.toLowerCase()))
-              .map(skill => (
-                <div 
-                  key={skill} 
-                  className="p-2 hover:bg-green-50 cursor-pointer"
-                  onClick={() => {
-                    setSelectedSkills([...selectedSkills, skill]);
-                    setSkillSearchTerm('');
-                  }}
-                >
-                  {skill}
+            {/* Show "Add custom skill" option if search term doesn't match exactly any existing skill */}
+            {showAddCustom && !allSkills.some(skill => 
+              skill.toLowerCase() === skillSearchTerm.toLowerCase() && 
+              !selectedSkills.includes(skill)
+            ) && (
+              <div 
+                className="p-2 hover:bg-green-100 cursor-pointer bg-green-50 border-b"
+                onClick={addCustomSkill}
+              >
+                <div className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-input" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
+                  <span>Add custom skill: <strong>{skillSearchTerm}</strong></span>
                 </div>
-              ))
-            }
+              </div>
+            )}
+            
+            {/* Show matching skills from predefined list */}
+            {filteredSkills.map(skill => (
+              <div 
+                key={skill} 
+                className="p-2 hover:bg-green-50 cursor-pointer"
+                onClick={() => {
+                  setSelectedSkills([...selectedSkills, skill]);
+                  setSkillSearchTerm('');
+                  setShowAddCustom(false);
+                }}
+              >
+                {skill}
+              </div>
+            ))}
+            
+            {/* Show message when no skills match */}
+            {filteredSkills.length === 0 && !showAddCustom && (
+              <div className="p-2 text-gray-500 italic">
+                No matching skills found. Type to add a custom skill.
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -71,7 +130,6 @@ const Skills = ({ register }) => {
       <input 
         type="hidden" 
         {...register("skills")} 
-        value={selectedSkills.join(',')} 
       />
     </div>
   );
