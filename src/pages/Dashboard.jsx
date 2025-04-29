@@ -9,7 +9,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-white p-8 flex flex-col">
       {/* Logo top-left */}
       <div className="mb-6">
-        <img src="/images/mobilis.png" alt="Mobilis Logo" className="w-40 h-auto" />
+        <img src="/images/mobilis.svg" alt="Mobilis Logo" className="w-40 h-auto" />
       </div>
 
       {/* Centered content */}
@@ -28,8 +28,7 @@ const Dashboard = () => {
         {/* Button */}
         <button
         onClick={handleNavigate}
-        className="px-8 py-3 text-red-600 border border-red-600 bg-[#FFF3F3] text-lg font-semibold rounded-lg transition hover:bg-red-600 hover:text-white hover:cursor-pointer
-"
+        className="px-8 py-3 text-red-600 border border-red-600 bg-[#FFF3F3] text-lg font-semibold rounded-lg transition hover:bg-red-600 hover:text-white hover:cursor-pointer"
         >
         Create a new offer
         </button>
