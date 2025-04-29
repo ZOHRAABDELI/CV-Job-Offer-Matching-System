@@ -2,30 +2,20 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
 import JobPostingForm from './pages/Create_offer.jsx';
+import MatchedCVsPage from  './pages/matchedCvs.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 
 export default function App() {
   return (
     <Router>
-      <div className="app">
-        <nav className="bg-green-600 text-white p-4">
-          <div className="container mx-auto flex justify-between items-center">
-            <div className="text-xl font-bold">Job Portal</div>
-            <ul className="flex space-x-4">
-              <li>
-                <Link to="/" className="hover:underline">Home</Link>
-              </li>
-              <li>
-                <Link to="/create-job" className="hover:underline">Create Job</Link>
-              </li>
-            </ul>
-          </div>
-        </nav>
+   
 
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Dashboard />} />
           <Route path="/create-job" element={<JobPostingForm />} />
+          <Route path="/matched-cv" element={<MatchedCVsPage />} />
         </Routes>
-      </div>
+     
     </Router>
   );
 }

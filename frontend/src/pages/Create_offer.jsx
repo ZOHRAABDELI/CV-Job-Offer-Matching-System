@@ -8,6 +8,7 @@ import Weights from '../components/offer_components/Weights';
 import Requirements from '../components/offer_components/Requirements';
 import UploadCV from '../components/offer_components/UploadCV';
 
+
 export default function JobPostingForm() {
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -81,8 +82,12 @@ const onSubmit = async (data) => {
     });
 
     if (response.data.success) {
-      alert('Job offer created successfully!');
+      alert('Job offer created successfully!'); // Keep the alert
       setSelectedFiles([]);
+      // Add a small delay to ensure the alert is shown before redirect
+      setTimeout(() => {
+        window.location.href = "/matched-cv";
+      }, 500); // 500ms delay to show the alert
     } else {
       setSubmitError('Failed to create job offer. Please try again.');
     }
