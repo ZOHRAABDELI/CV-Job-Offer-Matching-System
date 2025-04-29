@@ -6,7 +6,7 @@ import Skills from '../components/offer_components/Skills';
 import Language from '../components/offer_components/Language';
 import Weights from '../components/offer_components/Weights';
 import Requirements from '../components/offer_components/Requirements';
-import UploadCV from '../components/UploadCV';
+import UploadCV from '../components/offer_components/UploadCV';
 
 export default function JobPostingForm() {
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
