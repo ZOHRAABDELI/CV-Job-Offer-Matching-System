@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, Fragment } from "react";
 import TableComponent from "../components/matching/table_component.jsx";
 import { Dialog, Transition } from "@headlessui/react";
+import axios from 'axios';
 
 const MatchedCVsPage = () => {
   const [jsonData, setJsonData] = useState(null);
@@ -19,14 +20,15 @@ const MatchedCVsPage = () => {
   const [weightsValid, setWeightsValid] = useState(true); // To track if weights are valid
 
   useEffect(() => {
-    fetch("/results.json")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.ranking) {
-          setJsonData(data.ranking);
+    axios.get('http://localhost:5000/api/matched-cvs')
+      .then((response) => {
+        if (response.data && response.data.ranking) {
+          setJsonData(response.data.ranking);
         }
       })
-      .catch((err) => console.error(err));
+      .catch((error) => {
+        console.error('Error fetching matched CVs:', error);
+      });
   }, []);
 
   const currentRows = jsonData

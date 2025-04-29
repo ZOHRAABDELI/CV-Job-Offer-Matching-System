@@ -9,7 +9,6 @@ export default function App() {
   return (
     <Router>
    
-
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/create-job" element={<JobPostingForm />} />
