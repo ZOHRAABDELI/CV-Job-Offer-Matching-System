@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import Dashboard from './pages/Dashboard'; // adjust if needed
+import MatchedCVsPage from './pages/matchedCvs'; // adjust if needed
 
 function App() {
   return (
     <div>
-      <Dashboard />
+      <MatchedCVsPage />
     </div>
   );
 }

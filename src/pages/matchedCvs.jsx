@@ -55,7 +55,7 @@ const MatchedCVsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen p-8 bg-white">
       {/* Logo */}
       <div className="flex justify-start items-center mb-6">
         <img src="/images/mobilis.png" alt="Mobilis Logo" className="w-40 h-auto" />
