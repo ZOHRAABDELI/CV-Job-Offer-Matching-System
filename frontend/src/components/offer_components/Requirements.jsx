@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const Requirements = ({ register }) => {
+const Requirements = ({ register, setValue }) => {
   const [bulletPoints, setBulletPoints] = useState(['']);
 
   const handleBulletPointChange = (index, value) => {
@@ -20,6 +20,15 @@ const Requirements = ({ register }) => {
       setBulletPoints(newBulletPoints);
     }
   };
+
+  // Update the hidden input whenever bulletPoints changes
+  useEffect(() => {
+    const filteredPoints = bulletPoints.filter(point => point.trim() !== '');
+    if (filteredPoints.length > 0) {
+      const value = '• ' + filteredPoints.join('\\n• ');
+      setValue('requirements', value);
+    }
+  }, [bulletPoints, setValue]);
 
   return (
     <div className="mb-4">
@@ -62,7 +71,6 @@ const Requirements = ({ register }) => {
       <input 
         type="hidden" 
         {...register("requirements")} 
-        value={bulletPoints.filter(point => point.trim() !== '').join('\n• ')} 
       />
     </div>
   );

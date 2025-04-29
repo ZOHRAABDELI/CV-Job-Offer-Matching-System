@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const Experience = ({ register, errors }) => {
+const Experience = ({ register, errors, setValue }) => {
   const [experienceBulletPoints, setExperienceBulletPoints] = useState(['']);
 
   const handleExperienceBulletPointChange = (index, value) => {
@@ -20,6 +20,17 @@ const Experience = ({ register, errors }) => {
       setExperienceBulletPoints(newBulletPoints);
     }
   };
+
+  // Update the hidden input whenever experienceBulletPoints changes
+ // In Experience.jsx, modify the useEffect
+useEffect(() => {
+  const filteredPoints = experienceBulletPoints.filter(point => point.trim() !== '');
+  if (filteredPoints.length > 0) {
+    const value = '• ' + filteredPoints.join('\\n• ');
+    setValue('experienceDetails', value);
+  }
+}, [experienceBulletPoints, setValue]);
+
 
   return (
     <div className="mb-4">
@@ -78,7 +89,6 @@ const Experience = ({ register, errors }) => {
       <input 
         type="hidden" 
         {...register("experienceDetails")} 
-        value={experienceBulletPoints.filter(point => point.trim() !== '').join('\n• ')} 
       />
     </div>
   );
