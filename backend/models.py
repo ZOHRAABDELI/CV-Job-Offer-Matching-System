@@ -9,6 +9,7 @@ class User(Base):
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     user_email = Column(Text, nullable=False, unique=True, index=True)
     user_password = Column(Text, nullable=False)
+    user_name = Column(Text, nullable=False)
 
 class JobOffer(Base):
     __tablename__ = "job_offer"

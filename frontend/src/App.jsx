@@ -2,8 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
 import JobPostingForm from './pages/Create_offer.jsx';
-import SignupPage from './pages/SignUp.jsx';
-import LoginPage from './pages/Login.jsx';
+
 import AuthPage from './pages/AuthPage.jsx';
 export default function App() {
   return (
@@ -19,12 +18,12 @@ export default function App() {
               <li>
                 <Link to="/create-job" className="hover:underline">Create Job</Link>
               </li>
-              <li>
+              {/* <li>
                 <Link to="/Signup" className="hover:underline">Signup</Link>
               </li>
               <li>
                 <Link to="/Login" className="hover:underline">Login</Link>
-              </li>
+              </li> */}
               <li>
                 <Link to="/AuhAuthPaget" className="hover:underline">Auth Page</Link>
               </li>
@@ -36,8 +35,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/create-job" element={<JobPostingForm />} />
-          <Route path="/Signup" element={<SignupPage />} />
-          <Route path="/Login" element={<LoginPage />} />
+          {/* <Route path="/Signup" element={<SignupPage />} />
+          <Route path="/Login" element={<LoginPage />} /> */}
           <Route path="AuhAuthPaget" element={<AuthPage />} />
           {/* Add more routes as needed */}
 
