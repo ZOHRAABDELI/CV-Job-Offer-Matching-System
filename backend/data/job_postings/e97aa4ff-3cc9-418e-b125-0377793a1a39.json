@@ -1,0 +1,30 @@
+{
+  "jobTitle": "UI UX",
+  "location": "Algiers",
+  "positions": 2,
+  "yearsOfExperience": 3,
+  "education": "2",
+  "requirements": [
+    "\u2022 UX UI"
+  ],
+  "experienceDetails": [
+    "\u2022 FIGMA"
+  ],
+  "skills": [
+    "UI/UX Design"
+  ],
+  "languages": [
+    "English"
+  ],
+  "weights": {
+    "experience": 52,
+    "jobDescription": 10,
+    "education": 8,
+    "skills": 30
+  },
+  "cvFiles": [
+    "e97aa4ff-3cc9-418e-b125-0377793a1a39_Selma_Khelili_Intern_Resume.pdf"
+  ],
+  "id": "e97aa4ff-3cc9-418e-b125-0377793a1a39",
+  "createdAt": "2025-05-01T21:11:24.917944"
+}

@@ -1,0 +1,31 @@
+{
+  "jobTitle": "Data Scientist",
+  "location": "Algiers",
+  "positions": 2,
+  "yearsOfExperience": 2,
+  "education": "Bachelor's degree in Computer Science, Engineering, or related field  3+ years of experience in software development",
+  "requirements": [
+    "\u2022 nothing"
+  ],
+  "experienceDetails": [
+    "\u2022 nothing"
+  ],
+  "skills": [],
+  "languages": [],
+  "weights": {
+    "experience": 0,
+    "jobDescription": 0,
+    "education": 0,
+    "skills": 0
+  },
+  "cvFiles": [
+    "e8006343-1c6b-4d71-a54b-c26cd3c47277_Yamina__Guenez-CV.pdf",
+    "e8006343-1c6b-4d71-a54b-c26cd3c47277_Abdelhalim_Bedjaoui_CV_Fr.pdf",
+    "e8006343-1c6b-4d71-a54b-c26cd3c47277_cv.pdf",
+    "e8006343-1c6b-4d71-a54b-c26cd3c47277_CV_CHETIBI_Bouchra.pdf",
+    "e8006343-1c6b-4d71-a54b-c26cd3c47277_CV-bilal-dekar.pdf",
+    "e8006343-1c6b-4d71-a54b-c26cd3c47277_CV_Tazekritt_Malika.pdf"
+  ],
+  "id": "e8006343-1c6b-4d71-a54b-c26cd3c47277",
+  "createdAt": "2025-05-02T23:13:02.760115"
+}

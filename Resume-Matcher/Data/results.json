@@ -1,0 +1,50 @@
+{
+  "job_description": "job_description_filename.json",
+  "ranking": [
+    {
+      "resume": "3d750ddd-1ac6-4549-be34-dabd62256a89_-CV_EmploiPartner_Chemseddine-Ouazar-6876.json",
+      "total_score": 64.73,
+      "section_scores": {
+        "Education": 79.74,
+        "Skills": 83.65,
+        "Experience_Entries": 81.32
+      }
+    },
+    {
+      "resume": "e8006343-1c6b-4d71-a54b-c26cd3c47277_CV_CHETIBI_Bouchra.json",
+      "total_score": 40.83,
+      "section_scores": {
+        "Education": 81.85,
+        "Skills": 81.52,
+        "Experience_Entries": 0.0
+      }
+    },
+    {
+      "resume": "03d4818d-7655-4447-aa2d-ece37ef73322_DrisFatehResume.json",
+      "total_score": 0.0,
+      "section_scores": {
+        "Education": 0.0,
+        "Skills": 0.0,
+        "Experience_Entries": 0.0
+      }
+    },
+    {
+      "resume": "7b89c755-7a6b-400e-b57d-c7d770d0f67f_SAHEL Sofiane .json",
+      "total_score": 0.0,
+      "section_scores": {
+        "Education": 0.0,
+        "Skills": 0.0,
+        "Experience_Entries": 0.0
+      }
+    },
+    {
+      "resume": "e576fd86-b563-419c-9c33-0e7133086f2d_Kahlouche-Omar-Djaber.json",
+      "total_score": 0.0,
+      "section_scores": {
+        "Education": 0.0,
+        "Skills": 0.0,
+        "Experience_Entries": 0.0
+      }
+    }
+  ]
+}
