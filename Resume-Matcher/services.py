@@ -449,7 +449,7 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
 #     return round(total_score, 2), cleaned_section_scores
 
 
-def rank_resumes(model, weights=None):
+def rank_resumes(weights=None):
     """Ranks resumes based on their similarity to the first job description."""
     resumes_dir = "Data/Processed/Resumes"
     jds_dir = "Data/Processed/JobDescription"
@@ -468,7 +468,7 @@ def rank_resumes(model, weights=None):
     
     for resume_file in resume_files:
         resume_path = os.path.join(resumes_dir, resume_file)
-        total_score, section_scores = get_matching_score(model, resume_path, jd_path, weights)
+        total_score, section_scores = get_matching_score(resume_path, jd_path, weights)
         scores.append((resume_file, total_score, section_scores))
 
     # Sort resumes by similarity score in descending order
