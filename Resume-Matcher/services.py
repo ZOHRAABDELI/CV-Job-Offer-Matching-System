@@ -254,7 +254,7 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
         resume_skills = resume_data.get("Skills", {}).get("Keywords", [])
         # resume work entries keywords 
         experience_fields = []
-        for entry in resume_data.get("Experience_entries", []):
+        for entry in resume_data.get("Experience_Entries", []):
             if isinstance(entry, dict) and "Field" in entry:
                 experience_fields.extend(entry["Field"])
 
