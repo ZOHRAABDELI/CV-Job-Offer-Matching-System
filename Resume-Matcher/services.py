@@ -62,7 +62,8 @@ def read_json(filename):
     """Reads a JSON file and returns its content as a dictionary."""
     with open(filename) as f:
         return json.load(f)
-    
+  
+ 
 def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=60.0):
     """
     Computes the similarity score between a resume and a job description based on section-wise keywords
@@ -243,11 +244,211 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
             section_scores.pop("Experience_Entries", None)
             total_score += experience_score * weights["Experience"]
 
-    section_scores["Mission"] = 0.0
+    if "Mission" in weights:
+        jd_mission = jd_data.get("Job Description", {}).get("Mission", {}).get("Keywords", [])
+
+        # resume work experience
+        resume_experiences = resume_data.get("Work Experience", {}).get("Keywords", [])
+        # resume skills
+        resume_skills = resume_data.get("Skills", {}).get("Keywords", [])
+        # resume work entries keywords 
+        experience_fields = []
+        for entry in resume_data.get("Experience_entries", []):
+            if isinstance(entry, dict) and "Field" in entry:
+                experience_fields.extend(entry["Field"])
+
+        # combine all resume keywords 
+        cv_keywords = list(set(resume_experiences + resume_skills + experience_fields))
+        
+        for jd_mis in jd_mission:
+            best_mis_match = 0.0
+            
+            for cv_mis in cv_keywords:
+                # Get similarity score between this JD mission and CV mission
+                similarity_result = get_score(jd_mis, cv_mis)
+                similarity_score = similarity_result[0].score * 100
+                # Keep track of the best match for this JD mission
+                if similarity_score > best_mis_match:
+                    best_mis_match = similarity_score
+            # Add the best match score for this JD mission to the total
+            total_similarity_mission += best_mis_match
+        # Calculate average mission score by dividing by number of JD missions
+        avg_mission_score = total_similarity_mission / len(jd_mission)
+        section_scores["Mission"] = round(avg_mission_score, 2)
+        total_score += avg_mission_score * weights["Mission"]
+    else:
+        section_scores["Mission"] = 0.0
+
     cleaned_section_scores = {k: v for k, v in section_scores.items() if k != "Experience_Entries"}
     return round(total_score, 2), cleaned_section_scores
 
-def rank_resumes(weights=None):
+
+
+
+# def match_section(job_keywords, cv_keywords, model):
+#     """Match each job keyword to the most similar CV keyword, then average the similarities."""
+#     # Clean keywords
+#     job_keywords = [clean_text(k) for k in job_keywords]
+#     cv_keywords = [clean_text(k) for k in cv_keywords]
+
+#     if not job_keywords:
+#         return 1.0  # no required keywords => consider match complete
+#     if not cv_keywords:
+#         return 0.0  # no CV keywords => no match
+
+#     # Embed all keywords
+#     job_embeddings = model.encode(job_keywords)
+#     cv_embeddings = model.encode(cv_keywords)
+
+#     max_similarities = []
+
+#     for job_emb in job_embeddings:
+#         # Compute similarities between one job keyword and all CV keywords
+#         sims = cosine_similarity([job_emb], cv_embeddings)[0]
+#         max_sim = np.max(sims)  # take the best match
+#         max_similarities.append(max_sim)
+
+#     # Average of the best similarities
+#     average_similarity = np.mean(max_similarities)
+#     return float(average_similarity)
+
+# def match_experience(job_keywords, cv_keywords, model):
+#   experience_scores = []
+
+#   for job_entry in job_keywords:
+#     job_fields = job_entry.get("Field", [])
+#     job_duration = job_entry.get("duration_years", 0)
+
+#     best_score = 0.0  # Keep the best matching score for this job entry
+
+#     for cv_entry in cv_keywords:
+#       cv_fields = cv_entry.get("Field", [])
+#       cv_duration = cv_entry.get("duration_years", 0)
+#       if cv_fields:
+#         score = match_section(job_fields, cv_fields, model)
+#         if job_duration > 0:
+#           scale = cv_duration / job_duration
+#           # to be discussed 
+#           if scale > 1:
+#             scale = 1
+#           score = score*scale
+
+#       if score > best_score:
+#         best_score = score
+
+#     experience_scores.append(best_score)
+
+#             # Final experience match score = average across all job experience entries
+#   if experience_scores:
+#     return sum(experience_scores) / len(experience_scores)
+#   else:
+#     return 0.0  # No experience entries in CV
+
+# def get_matching_score(model, resume_path, jd_path, weights=None, similarity_threshold=60.0):
+#     """
+#     Computes the similarity score between a resume and a job description based on section-wise keywords
+#     and experience entries.
+    
+#     Args:
+#         resume_path (str): Path to the processed resume JSON file.
+#         jd_path (str): Path to the processed job description JSON file.
+#         weights (dict, optional): Weights for each section. Defaults to equal weights.
+#             Example:
+#                 {
+#                     "Education": 0.25,
+#                     "Skills": 0.25,
+#                     "Experience": 0.25,
+#                     "Mission":0.25
+#                 }
+#         similarity_threshold (float, optional): Minimum similarity score (percentage) required for 
+#                                               an experience match to be considered valid. Defaults to 60.0.
+    
+#     Returns:
+#         tuple: (weighted total score, dict of section scores)
+#     """
+#     # Read the JSON data
+#     resume_data = read_json(resume_path)
+#     jd_data = read_json(jd_path)
+    
+#     # Default weights if not provided
+#     if weights is None:
+#         weights = {
+#             "Education": 0.25,
+#             "Skills": 0.25,
+#             "Experience": 0.25,
+#             "Mission":0.25
+#         }
+
+#     total_score = 0.0
+#     section_scores = {}
+
+#     if "Education" in weights:
+#         resume_education = resume_data.get("Education", {}).get("Keywords", [])
+#         jd_education = jd_data.get("Job Description", {}).get("Education", {}).get("Keywords", [])
+        
+#         score = match_section(jd_education, resume_education, model)
+
+#         section_scores["Education"] = round(score, 2)
+#         total_score += score * weights["Education"]
+#     else:
+#         section_scores["Education"] = 0.0
+
+#     if "Skills" in weights:
+#         resume_skills = resume_data.get("Skills", {}).get("Keywords", [])
+#         jd_skills = jd_data.get("Job Description", {}).get("Skills", {}).get("Keywords", [])
+        
+#         score = match_section(jd_skills, resume_skills, model)
+
+#         section_scores["Skills"] = round(score, 2)
+#         total_score += score * weights["Skills"]
+#     else:
+#         section_scores["Skills"] = 0.0
+
+
+#     if "Experience" in weights:
+#       experience_entries = jd_data.get("Job Description", {}).get("Work Experience", {}).get("Keywords", [])
+#       resume_experiences = resume_data.get("Work Experience", {}).get("Keywords", [])
+
+#       score_experience = match_section(experience_entries, resume_experiences, model)
+
+#       experience_entries = jd_data.get("Job Description", {}).get("Experience_Entries", [])
+#       resume_experiences = resume_data.get("Experience_Entries", [])
+
+#       score_experience_entries = match_experience(experience_entries, resume_experiences, model)
+
+#       score = (score_experience + score_experience_entries) / 2
+
+#       section_scores["Experience"] = round(score, 2)
+#       total_score += score * weights["Experience"]
+#     else:
+#       section_scores["Experience"] = 0.0
+    
+#     if "Mission" in weights:
+#       jd_mission = jd_data.get("Job Description", {}).get("Mission", {}).get("Keywords", [])
+
+#       # resume work experience
+#       resume_experiences = resume_data.get("Work Experience", {}).get("Keywords", [])
+#       # resume skills
+#       resume_skills = resume_data.get("Skills", {}).get("Keywords", [])
+#       # resume work entries keywords 
+#       experience_fields = []
+#       for entry in resume_data.get("Experience_entries", []):
+#         if isinstance(entry, dict) and "Field" in entry:
+#           experience_fields.extend(entry["Field"])
+
+#       # combine all resume keywords 
+#       cv_keywords = list(set(resume_experiences + resume_skills + experience_fields))
+#       score = match_section(jd_mission, cv_keywords, model)
+#       section_scores["Mission"] = round(score, 2)
+#       total_score += score * weights["Mission"]
+#     else:
+#       section_scores["Mission"] = 0.0
+
+#     cleaned_section_scores = {k: v for k, v in section_scores.items()}
+#     return round(total_score, 2), cleaned_section_scores
+
+
+def rank_resumes(model, weights=None):
     """Ranks resumes based on their similarity to the first job description."""
     resumes_dir = "Data/Processed/Resumes"
     jds_dir = "Data/Processed/JobDescription"
@@ -266,7 +467,7 @@ def rank_resumes(weights=None):
     
     for resume_file in resume_files:
         resume_path = os.path.join(resumes_dir, resume_file)
-        total_score, section_scores = get_matching_score(resume_path, jd_path, weights)
+        total_score, section_scores = get_matching_score(model, resume_path, jd_path, weights)
         scores.append((resume_file, total_score, section_scores))
 
     # Sort resumes by similarity score in descending order
