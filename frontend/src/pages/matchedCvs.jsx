@@ -23,7 +23,7 @@ const MatchedCVsPage = () => {
     Education: 25,
     "Work Experience": 25,
     Skills: 25,
-    Experience_Requirements: 25,
+    Mission: 25,
   });
 
   
@@ -344,7 +344,7 @@ const MatchedCVsPage = () => {
                 </Dialog.Title>
 
                 <form className="space-y-4">
-                  {["Education", "Work Experience", "Skills", "Experience_Requirements"].map((field, i) => (
+                  {["Education", "Work Experience", "Skills", "Mission"].map((field, i) => (
                     <div key={i}>
                       <label className="block text-sm font-medium text-gray-700 mb-1">{field}</label>
                       <div className="flex items-center gap-2">

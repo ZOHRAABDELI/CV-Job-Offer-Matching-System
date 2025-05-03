@@ -39,7 +39,7 @@ class ParseResume:
             content = parsed.get("content", "")
             
             # Log warning if document is very long
-            if content and len(content) > 10000:
+            if content and len(content) > 100000:
                 logger.warning(f"Very long document ({len(content)} chars), may exceed token limits")
                 
             return content.strip() if content else ""

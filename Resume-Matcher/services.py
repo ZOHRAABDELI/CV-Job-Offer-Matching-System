@@ -76,7 +76,7 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
                 {
                     "Education": 0.30,
                     "Skills": 0.40,
-                    "Experience_Entries": 0.30
+                    "Experience": 0.30
                 }
         similarity_threshold (float, optional): Minimum similarity score (percentage) required for 
                                               an experience match to be considered valid. Defaults to 60.0.
@@ -93,7 +93,7 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
         weights = {
             "Education": 0.30,
             "Skills": 0.40,
-            "Experience_Entries": 0.30
+            "Experience": 0.30
         }
 
     total_score = 0.0
@@ -161,11 +161,40 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
         else:
             section_scores["Skills"] = 0.0
 
+    # Handle Work Experience section (same approach as Skills)
+    resume_work_exp = resume_data.get("Work Experience", {}).get("Keywords", [])
+    jd_work_exp = jd_data.get("Job Description", {}).get("Work Experience", {}).get("Keywords", [])
+    
+    if resume_work_exp and jd_work_exp:
+        total_similarity_work_exp = 0.0
+        
+        # For each work experience keyword in JD, find the most similar one in resume
+        for jd_exp in jd_work_exp:
+            best_work_exp_match = 0.0
+            
+            for resume_exp in resume_work_exp:
+                # Get similarity score between this JD work experience and resume work experience
+                similarity_result = get_score(jd_exp, resume_exp)
+                similarity_score = similarity_result[0].score * 100  # Convert to percentage
+                
+                # Keep track of the best match for this JD work experience
+                if similarity_score > best_work_exp_match:
+                    best_work_exp_match = similarity_score
+            
+            # Add the best match score for this JD work experience to the total
+            total_similarity_work_exp += best_work_exp_match
+        
+        # Calculate average work experience score by dividing by number of JD work experience keywords
+        avg_work_exp_score = total_similarity_work_exp / len(jd_work_exp)
+        section_scores["Work Experience"] = round(avg_work_exp_score, 2)
+    else:
+        section_scores["Work Experience"] = 0.0
+
     # Handle Experience Entries
     experience_entries = jd_data.get("Job Description", {}).get("Experience_Entries", [])
     resume_experiences = resume_data.get("Experience_Entries", [])
     
-    if experience_entries and resume_experiences and "Experience_Entries" in weights:
+    if experience_entries and resume_experiences:
         accepted_exp_scores = []
         
         for req in experience_entries:
@@ -200,16 +229,23 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
         
         # Calculate the average score of all accepted experiences
         if accepted_exp_scores:
-            avg_exp_score = sum(accepted_exp_scores) / len(accepted_exp_scores)
-            section_scores["Experience_Entries"] = round(avg_exp_score, 2)
-            total_score += avg_exp_score * weights["Experience_Entries"]
+            avg_exp_entry_score = sum(accepted_exp_scores) / len(accepted_exp_scores)
+            section_scores["Experience_Entries"] = round(avg_exp_entry_score, 2)
         else:
             section_scores["Experience_Entries"] = 0.0
-    elif "Experience_Entries" in weights:
+    else:
         section_scores["Experience_Entries"] = 0.0
-
+    
+    # Calculate combined Experience score (average of Work Experience and Experience_Entries)
+    if "Experience" in weights:
+        experience_score = (section_scores["Work Experience"] + section_scores["Experience_Entries"]) / 2
+        section_scores["Work Experience"] = experience_score
+        section_scores["Experience_Entries"] = round(experience_score, 2)
+        section_scores.pop("Experience_Entries", None)
+        total_score += experience_score * weights["Experience"]
+    
+    section_scores["Mission"] = 0.0
     return round(total_score, 2), section_scores
-
 
 def rank_resumes(weights=None):
     """Ranks resumes based on their similarity to the first job description."""
