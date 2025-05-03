@@ -8,8 +8,8 @@ from pathlib import Path
 
 # Constants
 OUTPUT_DIR = Path("../../Data/Processed/JobDescription")
-QWEN_MODEL = "qwen/qwq-32b:free"
-OPENROUTER_API_KEY = "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"
+QWEN_MODEL = "qwen/qwen-2.5-7b-instruct"
+OPENROUTER_API_KEY = "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"
 
 # Logger
 logger = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ class ParseJobDescription:
         try:
             parsed = parser.from_file(self.jd_path)
             content = parsed.get("content", "")
-            if content and len(content) > 10000:
+            if content and len(content) > 100000:
                 logger.warning(f"Very long job description ({len(content)} chars), may exceed token limits")
             return content.strip() if content else ""
         except Exception as e:

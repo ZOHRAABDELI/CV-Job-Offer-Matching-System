@@ -1,0 +1,27 @@
+{
+  "jobTitle": "cdc",
+  "location": "Algiers",
+  "positions": 7,
+  "yearsOfExperience": 8,
+  "education": "ccc",
+  "requirements": [
+    "\u2022 cc"
+  ],
+  "experienceDetails": [
+    "\u2022 ccc"
+  ],
+  "skills": [],
+  "languages": [],
+  "weights": {
+    "experience": 0,
+    "jobDescription": 0,
+    "education": 0,
+    "skills": 0
+  },
+  "cvFiles": [
+    "39ce3efc-97e1-4532-bb68-cd908bef43f7_Yamina__Guenez-CV.pdf",
+    "39ce3efc-97e1-4532-bb68-cd908bef43f7_Abdelhalim_Bedjaoui_CV_Fr.pdf"
+  ],
+  "id": "39ce3efc-97e1-4532-bb68-cd908bef43f7",
+  "createdAt": "2025-05-03T02:01:29.398208"
+}

@@ -1,0 +1,25 @@
+{
+  "job_description": "job_description_filename.json",
+  "ranking": [
+    {
+      "resume": "0450ca4b-d64a-4f75-94d8-97d8e33cc1a1_TALIA_KHIER_CV[FR].json",
+      "total_score": 41.5,
+      "section_scores": {
+        "Education": 82.07,
+        "Skills": 83.66,
+        "Work Experience": 80.42,
+        "Mission": 0.0
+      }
+    },
+    {
+      "resume": "0450ca4b-d64a-4f75-94d8-97d8e33cc1a1_Ing\u00e8nieur_Raouf_CV .json",
+      "total_score": 41.09,
+      "section_scores": {
+        "Education": 80.78,
+        "Skills": 83.19,
+        "Work Experience": 80.76,
+        "Mission": 0.0
+      }
+    }
+  ]
+}

@@ -238,14 +238,14 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
     
     # Calculate combined Experience score (average of Work Experience and Experience_Entries)
     if "Experience" in weights:
-        experience_score = (section_scores["Work Experience"] + section_scores["Experience_Entries"]) / 2
-        section_scores["Work Experience"] = experience_score
-        section_scores["Experience_Entries"] = round(experience_score, 2)
-        section_scores.pop("Experience_Entries", None)
-        total_score += experience_score * weights["Experience"]
-    
+            experience_score = (section_scores["Work Experience"] + section_scores["Experience_Entries"]) / 2
+            section_scores["Work Experience"] = round(experience_score, 2)
+            section_scores.pop("Experience_Entries", None)
+            total_score += experience_score * weights["Experience"]
+
     section_scores["Mission"] = 0.0
-    return round(total_score, 2), section_scores
+    cleaned_section_scores = {k: v for k, v in section_scores.items() if k != "Experience_Entries"}
+    return round(total_score, 2), cleaned_section_scores
 
 def rank_resumes(weights=None):
     """Ranks resumes based on their similarity to the first job description."""

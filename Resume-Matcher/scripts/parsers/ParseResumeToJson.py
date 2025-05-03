@@ -14,8 +14,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Constants
-QWEN_MODEL = "qwen/qwq-32b:free"
-OPENROUTER_API_KEY = "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" # put your API
+QWEN_MODEL = "qwen/qwen-2.5-7b-instruct"
+OPENROUTER_API_KEY = "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" # put your API
 OUTPUT_DIR = Path("../../Data/Processed/Resumes")
 
 class ParseResume:
