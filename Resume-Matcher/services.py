@@ -92,9 +92,10 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
     # Default weights if not provided
     if weights is None:
         weights = {
-            "Education": 0.30,
-            "Skills": 0.40,
-            "Experience": 0.30
+            "Education": 0.25,
+            "Skills": 0.25,
+            "Experience": 0.25,
+            "Mission":0.25
         }
 
     total_score = 0.0
