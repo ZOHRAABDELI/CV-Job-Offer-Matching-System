@@ -68,6 +68,7 @@ const MatchedCVsPage = () => {
         message: `Uploading ${files.length} CV${files.length > 1 ? "s" : ""}...`,
       });
       setLoading(true);
+
   
       const filePromises = Array.from(files).map((file) => {
         return new Promise((resolve, reject) => {
@@ -77,7 +78,7 @@ const MatchedCVsPage = () => {
             resolve({
               filename: file.name,
               content: base64Data,
-              type: file.type,
+              type: file.type, // Include the file type
             });
           };
           reader.onerror = reject;
@@ -88,9 +89,10 @@ const MatchedCVsPage = () => {
       try {
         const cvFiles = await Promise.all(filePromises);
   
+        // Wrap the array in an object
         const response = await axios.post(
           "http://localhost:5000/api/upload-cvs",
-          cvFiles,
+          cvFiles,  // just the array (not wrapped in an object)
           {
             headers: {
               "Content-Type": "application/json",
@@ -98,20 +100,29 @@ const MatchedCVsPage = () => {
             },
           }
         );
-  
+        
         if (response.data && response.data.success) {
-          setUploadStatus({
-            show: true,
-            success: true,
-            message: `${files.length} CV${files.length > 1 ? "s" : ""} uploaded and processed successfully!`,
-          });
-  
-          // Now fetch matched CVs and THEN stop loading
+          // Only show success after matched response is fully ready
           const matchedResponse = await axios.get("http://localhost:5000/api/matched-cvs");
+        
           if (matchedResponse.data && matchedResponse.data.ranking) {
             setJsonData(matchedResponse.data.ranking);
+        
+            // ✅ Now update UI status
+            setUploadStatus({
+              show: true,
+              success: true,
+              message: `${files.length} CV${files.length > 1 ? "s" : ""} uploaded and processed successfully!`,
+            });
+        
+            setTimeout(() => {
+              setUploadStatus((prev) => ({ ...prev, show: false }));
+            }, 5000);
           }
+        
+          setLoading(false); // ✅ Only stop loading after everything is done
         }
+        
       } catch (error) {
         console.error("Error uploading CV files:", error);
         setUploadStatus({
@@ -119,8 +130,6 @@ const MatchedCVsPage = () => {
           success: false,
           message: `Error: ${error.response?.data?.message || "Failed to upload CVs. Please try again."}`,
         });
-      } finally {
-        setLoading(false); // <-- always stop loading, success or fail
   
         setTimeout(() => {
           setUploadStatus((prev) => ({ ...prev, show: false }));
@@ -128,7 +137,7 @@ const MatchedCVsPage = () => {
       }
     }
   };
-  
+
   
   const recalculateTotalScore = (sectionScores) => {
     const weightedScore = Object.keys(sectionScores).reduce((total, section) => {

@@ -2,22 +2,22 @@
   "job_description": "job_description_filename.json",
   "ranking": [
     {
-      "resume": "0450ca4b-d64a-4f75-94d8-97d8e33cc1a1_TALIA_KHIER_CV[FR].json",
-      "total_score": 41.5,
+      "resume": "01fc9fe6-1bc8-4279-aee8-4d8d0e69489e_Abdelhalim_Bedjaoui_CV_Fr.json",
+      "total_score": 41.59,
       "section_scores": {
-        "Education": 82.07,
-        "Skills": 83.66,
-        "Work Experience": 80.42,
+        "Education": 82.01,
+        "Skills": 84.02,
+        "Work Experience": 83.18,
         "Mission": 0.0
       }
     },
     {
-      "resume": "0450ca4b-d64a-4f75-94d8-97d8e33cc1a1_Ing\u00e8nieur_Raouf_CV .json",
-      "total_score": 41.09,
+      "resume": "d0abdb35-0694-4862-80ff-9c71f298fffd_Yamina__Guenez-CV.json",
+      "total_score": 41.56,
       "section_scores": {
-        "Education": 80.78,
-        "Skills": 83.19,
-        "Work Experience": 80.76,
+        "Education": 82.01,
+        "Skills": 83.91,
+        "Work Experience": 79.66,
         "Mission": 0.0
       }
     }
