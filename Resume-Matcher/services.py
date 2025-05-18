@@ -91,9 +91,10 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
     # Default weights if not provided
     if weights is None:
         weights = {
-            "Education": 0.30,
-            "Skills": 0.40,
-            "Experience": 0.30
+            "Education": 0.25,
+            "Skills": 0.25,
+            "Experience": 0.25,
+            "Mission":0.25
         }
 
     total_score = 0.0
@@ -101,190 +102,93 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
 
     # Handle Education section with the same approach as Skills
     if "Education" in weights:
-        resume_education = resume_data.get("Education", {}).get("Keywords", [])
-        jd_education = jd_data.get("Job Description", {}).get("Education", {}).get("Keywords", [])
+        resume_education = " ".join(resume_data.get("Education", {}).get("Keywords", []))
+        jd_education = " ".join(jd_data.get("Job Description", {}).get("Education", {}).get("Keywords", []))
         
         if resume_education and jd_education:
-            total_similarity_education = 0.0
-            
-            # For each education requirement in JD, find the most similar one in resume
-            for jd_edu in jd_education:
-                best_edu_match = 0.0
-                
-                for resume_edu in resume_education:
-                    # Get similarity score between this JD education and resume education
-                    similarity_result = get_score(jd_edu, resume_edu)
-                    similarity_score = similarity_result[0].score * 100  # Convert to percentage
-                    
-                    # Keep track of the best match for this JD education requirement
-                    if similarity_score > best_edu_match:
-                        best_edu_match = similarity_score
-                
-                # Add the best match score for this JD education to the total
-                total_similarity_education += best_edu_match
-            
-            # Calculate average education score by dividing by number of JD education requirements
-            avg_education_score = total_similarity_education / len(jd_education)
-            section_scores["Education"] = round(avg_education_score, 2)
-            total_score += avg_education_score * weights["Education"]
+            similarity_score = get_score(jd_education, resume_education)[0].score * 100
+            section_scores["Education"] = round(similarity_score, 2)
+            total_score += similarity_score * weights["Education"]
         else:
             section_scores["Education"] = 0.0
 
     # Handle Skills section with the improved matching logic
     if "Skills" in weights:
-        resume_skills = resume_data.get("Skills", {}).get("Keywords", [])
-        jd_skills = jd_data.get("Job Description", {}).get("Skills", {}).get("Keywords", [])
+        resume_skills = " ".join(resume_data.get("Skills", {}).get("Keywords", []))
+        jd_skills = " ".join(jd_data.get("Job Description", {}).get("Skills", {}).get("Keywords", []))
         
         if resume_skills and jd_skills:
-            total_similarity_skills = 0.0
-            
-            # For each skill in JD, find the most similar skill in resume
-            for jd_skill in jd_skills:
-                best_skill_match = 0.0
-                
-                for resume_skill in resume_skills:
-                    # Get similarity score between this JD skill and resume skill
-                    similarity_result = get_score(jd_skill, resume_skill)
-                    similarity_score = similarity_result[0].score * 100  # Convert to percentage
-                    
-                    # Keep track of the best match for this JD skill
-                    if similarity_score > best_skill_match:
-                        best_skill_match = similarity_score
-                
-                # Add the best match score for this JD skill to the total
-                total_similarity_skills += best_skill_match
-            
-            # Calculate average skill score by dividing by number of JD skills
-            avg_skill_score = total_similarity_skills / len(jd_skills)
-            section_scores["Skills"] = round(avg_skill_score, 2)
-            total_score += avg_skill_score * weights["Skills"]
+            similarity_score = get_score(jd_skills, resume_skills)[0].score * 100
+            section_scores["Skills"] = round(similarity_score, 2)
+            total_score += similarity_score * weights["Skills"]
         else:
             section_scores["Skills"] = 0.0
 
-    # Handle Work Experience section (same approach as Skills)
-    resume_work_exp = resume_data.get("Work Experience", {}).get("Keywords", [])
-    jd_work_exp = jd_data.get("Job Description", {}).get("Work Experience", {}).get("Keywords", [])
-    
+    # Work Experience (Keywords)
+    resume_work_exp = " ".join(resume_data.get("Work Experience", {}).get("Keywords", []))
+    jd_work_exp = " ".join(jd_data.get("Job Description", {}).get("Work Experience", {}).get("Keywords", []))
     if resume_work_exp and jd_work_exp:
-        total_similarity_work_exp = 0.0
-        
-        # For each work experience keyword in JD, find the most similar one in resume
-        for jd_exp in jd_work_exp:
-            best_work_exp_match = 0.0
-            
-            for resume_exp in resume_work_exp:
-                # Get similarity score between this JD work experience and resume work experience
-                similarity_result = get_score(jd_exp, resume_exp)
-                similarity_score = similarity_result[0].score * 100  # Convert to percentage
-                
-                # Keep track of the best match for this JD work experience
-                if similarity_score > best_work_exp_match:
-                    best_work_exp_match = similarity_score
-            
-            # Add the best match score for this JD work experience to the total
-            total_similarity_work_exp += best_work_exp_match
-        
-        # Calculate average work experience score by dividing by number of JD work experience keywords
-        avg_work_exp_score = total_similarity_work_exp / len(jd_work_exp)
-        section_scores["Work Experience"] = round(avg_work_exp_score, 2)
+        similarity_score = get_score(jd_work_exp, resume_work_exp)[0].score * 100
+        section_scores["Work Experience"] = round(similarity_score, 2)
     else:
         section_scores["Work Experience"] = 0.0
 
-    # Handle Experience Entries
+    # Experience Entries 
+    # I am not sure about this 
     experience_entries = jd_data.get("Job Description", {}).get("Experience_Entries", [])
     resume_experiences = resume_data.get("Experience_Entries", [])
-    
     if experience_entries and resume_experiences:
-        accepted_exp_scores = []
-        
+        accepted_scores = []
         for req in experience_entries:
-            req_field = req.get("Field", [])
-            # Convert field list to string for matching
-            if isinstance(req_field, list):
-                req_field = " ".join(req_field)
+            req_field = " ".join(req.get("Field", [])) if isinstance(req.get("Field"), list) else req.get("Field", "")
             req_min_years = req.get("duration_years", 0)
-            best_match_score = 0
-            requirement_matched = False
-            
-            # Find the most semantically similar experience entry that meets years requirement
+            best_score = 0.0
             for exp in resume_experiences:
-                exp_field = exp.get("Field", [])
-                # Convert field list to string for matching
-                if isinstance(exp_field, list):
-                    exp_field = " ".join(exp_field)
+                exp_field = " ".join(exp.get("Field", [])) if isinstance(exp.get("Field"), list) else exp.get("Field", "")
                 exp_duration = exp.get("duration_years", 0)
-                
-                # Check semantic similarity
-                similarity_result = get_score(exp_field, req_field)
-                similarity_score = similarity_result[0].score * 100  # Convert to percentage
-                
-                # Check if experience years >= required years, score > threshold, and it's the best match so far
-                if exp_duration >= req_min_years and similarity_score > best_match_score and similarity_score >= similarity_threshold:
-                    best_match_score = similarity_score
-                    requirement_matched = True
-            
-            # Add score only if a matching experience was found
-            if requirement_matched:
-                accepted_exp_scores.append(best_match_score)
-        
-        # Calculate the average score of all accepted experiences
-        if accepted_exp_scores:
-            avg_exp_entry_score = sum(accepted_exp_scores) / len(accepted_exp_scores)
-            section_scores["Experience_Entries"] = round(avg_exp_entry_score, 2)
-        else:
-            section_scores["Experience_Entries"] = 0.0
+                score = get_score(req_field, exp_field)[0].score * 100
+                if exp_duration >= req_min_years and score > best_score and score >= similarity_threshold:
+                    best_score = score
+            if best_score > 0:
+                accepted_scores.append(best_score)
+        section_scores["Experience_Entries"] = round(sum(accepted_scores) / len(accepted_scores), 2) if accepted_scores else 0.0
     else:
         section_scores["Experience_Entries"] = 0.0
-    
-    # Calculate combined Experience score (average of Work Experience and Experience_Entries)
+
+    # Combine Work Experience and Experience Entries
     if "Experience" in weights:
-            experience_score = (section_scores["Work Experience"] + section_scores["Experience_Entries"]) / 2
-            section_scores["Work Experience"] = round(experience_score, 2)
-            section_scores.pop("Experience_Entries", None)
-            total_score += experience_score * weights["Experience"]
+        experience_score = (section_scores["Work Experience"] + section_scores["Experience_Entries"]) / 2
+        section_scores["Work Experience"] = round(experience_score, 2)
+        section_scores.pop("Experience_Entries", None)
+        total_score += experience_score * weights["Experience"]
 
+    # Mission
     if "Mission" in weights:
-        jd_mission = jd_data.get("Job Description", {}).get("Mission", {}).get("Keywords", [])
+        jd_mission = " ".join(jd_data.get("Job Description", {}).get("Mission", {}).get("Keywords", []))
 
-        # resume work experience
         resume_experiences = resume_data.get("Work Experience", {}).get("Keywords", [])
-        # resume skills
         resume_skills = resume_data.get("Skills", {}).get("Keywords", [])
-        # resume work entries keywords 
         experience_fields = []
-        for entry in resume_data.get("Experience_entries", []):
-            if isinstance(entry, dict) and "Field" in entry:
-                experience_fields.extend(entry["Field"])
+        for entry in resume_data.get("Experience_Entries", []):
+            experience_fields.extend(entry.get("Field", []))
+        all_cv_text = " ".join(set(resume_experiences + resume_skills + experience_fields))
 
-        # combine all resume keywords 
-        cv_keywords = list(set(resume_experiences + resume_skills + experience_fields))
-        total_similarity_mission = 0.0
-
-        for jd_mis in jd_mission:
-            best_mis_match = 0.0
-            
-            for cv_mis in cv_keywords:
-                # Get similarity score between this JD mission and CV mission
-                similarity_result = get_score(jd_mis, cv_mis)
-                similarity_score = similarity_result[0].score * 100
-                # Keep track of the best match for this JD mission
-                if similarity_score > best_mis_match:
-                    best_mis_match = similarity_score
-            # Add the best match score for this JD mission to the total
-            total_similarity_mission += best_mis_match
-        # Calculate average mission score by dividing by number of JD missions
-        avg_mission_score = total_similarity_mission / len(jd_mission)
-        section_scores["Mission"] = round(avg_mission_score, 2)
-        total_score += avg_mission_score * weights["Mission"]
-
-    elif "Mission" not in weights:
-        section_scores["Mission"] = 0.0
+        if jd_mission and all_cv_text:
+            similarity_score = get_score(jd_mission, all_cv_text)[0].score * 100
+            section_scores["Mission"] = round(similarity_score, 2)
+            total_score += similarity_score * weights["Mission"]
+        else:
+            section_scores["Mission"] = 0.0
 
     cleaned_section_scores = {k: v for k, v in section_scores.items() if k != "Experience_Entries"}
     return round(total_score, 2), cleaned_section_scores
 
+
+from concurrent.futures import ProcessPoolExecutor
+from pathlib import Path
+
 def rank_resumes(weights=None):
-    """Ranks resumes based on their similarity to the first job description."""
+    
     resumes_dir = "Data/Processed/Resumes"
     jds_dir = "Data/Processed/JobDescription"
     
@@ -297,28 +201,19 @@ def rank_resumes(weights=None):
     # Assume only ONE job description exists (pick the first one)
     jd_filename = jd_files[0]
     jd_path = os.path.join(jds_dir, jd_filename)
-
-    scores = []
     
-    for resume_file in resume_files:
-        resume_path = os.path.join(resumes_dir, resume_file)
-        total_score, section_scores = get_matching_score(resume_path, jd_path, weights)
-        scores.append((resume_file, total_score, section_scores))
+    resume_paths = [Path(os.path.join(resumes_dir, resume_file)) for resume_file in resume_files]
 
-    # Sort resumes by similarity score in descending order
-    ranked_resumes = sorted(scores, key=lambda x: x[1], reverse=True)
+    def task(resume_path):
+        score, section_scores = get_matching_score(resume_path, jd_path, weights)
+        return {
+            "resume_path": str(resume_path),
+            "score": score,
+            "section_scores": section_scores
+        }
 
-    # Prepare the ranking results with section scores
-    ranking_results = {
-        "job_description": jd_filename,
-        "ranking": [
-            {
-                "resume": resume_file,
-                "total_score": total_score,
-                "section_scores": section_scores
-            } 
-            for resume_file, total_score, section_scores in ranked_resumes
-        ]
-    }
+    with ProcessPoolExecutor() as executor: # here I can set ProcessPoolExecutor(max_workers=n) to limit the number of processes
+        results = list(executor.map(task, resume_paths))
 
-    return ranking_results
+    # Sort results by descending score
+    return sorted(results, key=lambda x: x["score"], reverse=True)
