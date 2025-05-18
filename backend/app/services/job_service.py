@@ -5,50 +5,64 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 from ..models.job import JobPosting
-from ..utils.file_utils import save_json_file, load_json_file, save_base64_file, list_json_files
+from ..utils.file_utils import save_pdf_file, load_json_file, save_base64_file, list_json_files, save_json_file
 from ..config import DATA_DIR
 class JobService:
     def __init__(self):
-        #self.job_postings_dir = DATA_DIR / "JobDescription" This is the correct path 
-        self.job_postings_dir = DATA_DIR / "JobDesc"# For pdf test
+        self.job_postings_dir = DATA_DIR / "JobDescription"  
+        #self.job_postings_dir = DATA_DIR / "JobDesc"# For pdf test
         self.cv_files_dir = DATA_DIR / "Resumes"
+        self.weights = DATA_DIR / "Weights"
+
 
     
     def create_job_offer(self, job_posting: JobPosting) -> Dict[str, Any]:
         """Create a new job offer and save associated CV files"""
-        # Generate a unique ID for the job posting
         job_id = str(uuid.uuid4())
-        
+
         # Save CV files if any
         cv_paths = []
         if job_posting.cvFiles:
-            for cv_file in job_posting.cvFiles:
-                # Create a unique filename
-                filename = f"{job_id}_{cv_file.filename}"
-                
-                # Save the file
-                saved_filename = save_base64_file(
-                    self.cv_files_dir, 
-                    filename, 
-                    cv_file.content
-                )
-                
-                cv_paths.append(saved_filename)
-        
+                    for cv_file in job_posting.cvFiles:
+                        # Generate a unique filename based on content hash to avoid duplicates
+                        # This assumes the filename has an extension
+                        name_parts = cv_file.filename.split('.')
+                        base_name = '.'.join(name_parts[:-1]) if len(name_parts) > 1 else name_parts[0]
+                        extension = name_parts[-1] if len(name_parts) > 1 else ""
+                        
+                        # Create a unique filename based on the original name
+                        unique_filename = f"{base_name}_{uuid.uuid4().hex[:8]}.{extension}"
+                        
+                        # Check if this exact file content already exists
+                        saved_filename = save_base64_file(
+                            self.cv_files_dir,
+                            unique_filename,
+                            cv_file.content
+                        )
+                        cv_paths.append(saved_filename)
+
         # Prepare job posting data for saving
         job_data = job_posting.dict()
         job_data["id"] = job_id
         job_data["createdAt"] = datetime.now().isoformat()
-        
-        # Replace the CV file content with just the filenames
         job_data["cvFiles"] = cv_paths
-        
-        # Save the job posting as a JSON file
+
+        # Save job posting as JSON
         job_file_path = self.job_postings_dir / f"{job_id}.json"
-        save_json_file(job_file_path, job_data)
-        
+        save_pdf_file(job_file_path, job_data)
+
+        # Save weights JSON (if provided in the job_posting)
+        if "weights" in job_data:
+            weights_data = {
+                "jobId": job_id,
+                "weights": job_data["weights"],
+                "timestamp": datetime.now().timestamp()
+            }
+            weights_file_path = self.weights / f"{job_id}_weights.json"
+            save_json_file(weights_file_path, weights_data)
+
         return {"success": True, "jobId": job_id}
-    
+
     def get_job_offers(self) -> Dict[str, Any]:
         """Get all job offers"""
         job_offers = list_json_files(self.job_postings_dir)

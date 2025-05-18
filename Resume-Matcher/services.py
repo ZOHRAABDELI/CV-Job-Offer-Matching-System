@@ -92,8 +92,9 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
     if weights is None:
         weights = {
             "Education": 0.30,
-            "Skills": 0.40,
-            "Experience": 0.30
+            "Skills": 0.10,
+            "Experience": 0.20,
+            "Mission": 0.40
         }
 
     total_score = 0.0
@@ -243,7 +244,42 @@ def get_matching_score(resume_path, jd_path, weights=None, similarity_threshold=
             section_scores.pop("Experience_Entries", None)
             total_score += experience_score * weights["Experience"]
 
-    section_scores["Mission"] = 0.0
+    if "Mission" in weights:
+        jd_mission = jd_data.get("Job Description", {}).get("Mission", {}).get("Keywords", [])
+
+        # resume work experience
+        resume_experiences = resume_data.get("Work Experience", {}).get("Keywords", [])
+        # resume skills
+        resume_skills = resume_data.get("Skills", {}).get("Keywords", [])
+        # resume work entries keywords 
+        experience_fields = []
+        for entry in resume_data.get("Experience_entries", []):
+            if isinstance(entry, dict) and "Field" in entry:
+                experience_fields.extend(entry["Field"])
+
+        # combine all resume keywords 
+        cv_keywords = list(set(resume_experiences + resume_skills + experience_fields))
+        total_similarity_mission = 0.0
+
+        for jd_mis in jd_mission:
+            best_mis_match = 0.0
+            
+            for cv_mis in cv_keywords:
+                # Get similarity score between this JD mission and CV mission
+                similarity_result = get_score(jd_mis, cv_mis)
+                similarity_score = similarity_result[0].score * 100
+                # Keep track of the best match for this JD mission
+                if similarity_score > best_mis_match:
+                    best_mis_match = similarity_score
+            # Add the best match score for this JD mission to the total
+            total_similarity_mission += best_mis_match
+        # Calculate average mission score by dividing by number of JD missions
+        avg_mission_score = total_similarity_mission / len(jd_mission)
+        section_scores["Mission"] = round(avg_mission_score, 2)
+        total_score += avg_mission_score * weights["Mission"]
+
+   
+    print("********************************Total Scores:****************************", total_score)
     cleaned_section_scores = {k: v for k, v in section_scores.items() if k != "Experience_Entries"}
     return round(total_score, 2), cleaned_section_scores
 

@@ -52,24 +52,19 @@ async def clean_data():
 
 @app.get("/rank-resumes/")
 async def rank(
-    education: Optional[float] = Query(default=0.25, ge=0.0, le=1.0),
+    education: Optional[float] = Query(default=0.15, ge=0.0, le=1.0),
     experience: Optional[float] = Query(default=0.35, ge=0.0, le=1.0),
     skills: Optional[float] = Query(default=0.35, ge=0.0, le=1.0),
-    mission: Optional[float] = Query(default=0.25, ge=0.0, le=1.0),
-
-
-):
-
-                      
+    mission: Optional[float] = Query(default=0.15, ge=0.0, le=1.0),
+):      
     try:
         weights = {
             "Education": education,
             "Experience_Entries": experience,
             "Skills": skills,
             "Mission": mission
-            
         }
-
+        print("[DEBUG] Loaded weights from api:", weights)
         # Optional: Normalize weights if necessary
         total = sum(weights.values())
         if total != 1.0:

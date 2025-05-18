@@ -304,7 +304,34 @@ const MatchedCVsPage = () => {
         >
           Adjust Weights
         </button>
+        <button
+  onClick={async () => {
+    try {
+      await fetch('http://localhost:8000/clean_data/', { method: 'DELETE' });
+
+
+      if (res.ok) {
+        alert('Data cleared successfully!');
+        // Optionally refresh data here
+      } else {
+        alert('Failed to clear data.');
+      }
+    } catch (error) {
+      console.error('Error clearing data:', error);
+      alert('An error occurred.');
+    }
+  }}
+  className="px-6 py-2 bg-red-500 text-white border border-red-500 rounded-lg font-semibold hover:bg-white hover:text-red-500 transition"
+>
+  Clear Data
+</button>
+
+
+
+
       </div>
+      
+
 
       {showSuccessPopup && (
         <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center z-50">

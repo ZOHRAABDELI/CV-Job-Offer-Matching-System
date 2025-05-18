@@ -53,7 +53,7 @@ function AuthPage() {
         localStorage.setItem("token", response.data.access_token);
         
         // Redirect user to dashboard or home page
-        navigate("/dashboard");
+        navigate("/landing");
       } else {
         // Sign up request
         if (formData.password !== formData.confirmPassword) {
@@ -78,7 +78,7 @@ function AuthPage() {
         });
 
         localStorage.setItem("token", loginResponse.data.access_token);
-        navigate("/dashboard");
+        navigate("/landing");
       }
     } catch (err) {
       console.error("Auth error:", err);

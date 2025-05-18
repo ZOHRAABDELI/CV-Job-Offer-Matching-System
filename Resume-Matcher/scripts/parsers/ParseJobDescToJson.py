@@ -34,7 +34,7 @@ class ParseJobDescription:
         try:
             parsed = parser.from_file(self.jd_path)
             content = parsed.get("content", "")
-            if content and len(content) > 100000:
+            if content and len(content) > 300000:
                 logger.warning(f"Very long job description ({len(content)} chars), may exceed token limits")
             return content.strip() if content else ""
         except Exception as e:
@@ -76,7 +76,7 @@ class ParseJobDescription:
             "    }\n"
             "  }\n"
             "}\n\n"
-            "Extract each distinct experience entry as a separate item in Experience_Entries, as many as needed. For each entry, identify the field domains as a list of keywords and the duration in years. IMPORTANT: NOTE THAT NO MATTER THE LANGUAGE USED FOR THE JOB DESCRIPTION, YOU MUST ALWAYS PROVIDE THE EXTRACTION USING ENGLISH (WHATEVER THE LANGUAGE ALWAYS TRANSLATE TO ENGLISH). For the Education section, extract educational requirements as keywords. For Mission and Skills sections, extract relevant keywords.\n\n"
+            "Extract each distinct experience entry as a separate item in Experience_Entries, as many as needed. For each entry, identify the field domains as a list of keywords and the duration in years. IMPORTANT: NOTE THAT NO MATTER THE LANGUAGE USED FOR THE JOB DESCRIPTION, YOU MUST ALWAYS PROVIDE THE EXTRACTION USING ENGLISH (WHATEVER THE LANGUAGE ALWAYS TRANSLATE TO ENGLISH). For the Education section, extract educational requirements as keywords. For Mission and Skills sections, extract relevant keywords, even if there isn't an explicit mention of any of the sections requied, and you find out that there are keywords in the job description that belong to that section, you should put them in that relevant section as a keyword .\n\n"
             "Here is the job description text:\n"
             f"{text}"
         )

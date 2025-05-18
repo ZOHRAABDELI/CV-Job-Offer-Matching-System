@@ -39,7 +39,7 @@ class ParseResume:
             content = parsed.get("content", "")
             
             # Log warning if document is very long
-            if content and len(content) > 100000:
+            if content and len(content) > 300000:
                 logger.warning(f"Very long document ({len(content)} chars), may exceed token limits")
                 
             return content.strip() if content else ""
@@ -96,7 +96,7 @@ class ParseResume:
         payload = {
             "model": QWEN_MODEL,
             "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 5000  # Ensure we get complete responses
+            "max_tokens": 15000  # Ensure we get complete responses
         }
 
         try:
@@ -104,7 +104,7 @@ class ParseResume:
                 "https://openrouter.ai/api/v1/chat/completions", 
                 headers=headers, 
                 json=payload,
-                timeout=60  # Increased timeout for longer documents
+                timeout=600  # Increased timeout for longer documents
             )
             response.raise_for_status()
             result = response.json()

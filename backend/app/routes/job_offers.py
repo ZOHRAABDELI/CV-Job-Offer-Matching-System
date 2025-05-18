@@ -16,7 +16,6 @@ def create_job_offer(
     try:
         # This must finish ALL processing before returning
         result = job_service.create_job_offer(job_posting)
-
         # Optional: Add confirmation if CV matching was also done
         return {"success": True, "message": "Job offer created successfully", "data": result}
 

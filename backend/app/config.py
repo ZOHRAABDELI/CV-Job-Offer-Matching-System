@@ -6,8 +6,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = BASE_DIR / "Resume-Matcher" / "Data"
 
 # Ensure required directories exist
-#os.makedirs(DATA_DIR / "JobDescription", exist_ok=True) This is the correct path 
-os.makedirs(DATA_DIR / "JobDesc", exist_ok=True)# This one is to test with JD as pdf 
+os.makedirs(DATA_DIR / "JobDescription", exist_ok=True) 
+os.makedirs(DATA_DIR / "Weights", exist_ok=True) 
+
+#os.makedirs(DATA_DIR / "JobDesc", exist_ok=True)# This one is to test with JD as pdf 
 
 os.makedirs(DATA_DIR / "Resumes", exist_ok=True)
 

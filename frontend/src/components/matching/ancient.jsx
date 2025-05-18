@@ -1,70 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
+import React, { useState } from 'react';
 
 const TableComponent = ({ data }) => {
-  // Initialize tableData from props and maintain state properly
-  const [tableData, setTableData] = useState([]);
-  
-  // Update tableData whenever the data prop changes
-  useEffect(() => {
-    if (data && data.length > 0) {
-      setTableData(data.map(item => ({
-        ...item,
-        original_decision: item.original_decision || item.decision || (
-          item.total_score >= 80 ? '● Accepted' :
-          item.total_score >= 70 ? '● Pending' :
-          '● Shortlisted'
-        ),
-        decision: item.decision || (
-          item.total_score >= 80 ? '● Accepted' :
-          item.total_score >= 70 ? '● Pending' :
-          '● Shortlisted'
-        )
-      })));
-    }
-  }, [data]);
-  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentRowIndex, setCurrentRowIndex] = useState(null);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-  const [editedDecision, setEditedDecision] = useState('');
-  const sectionNames = tableData && tableData.length > 0 ? Object.keys(tableData[0].section_scores || {}) : [];
-  const [decisionFilter, setDecisionFilter] = useState('All');
-  const [visibleColumns, setVisibleColumns] = useState(sectionNames);
-  const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
-  const [tempVisibleColumns, setTempVisibleColumns] = useState(visibleColumns);
-  
-  // Update visibleColumns when sectionNames change
-  useEffect(() => {
-    setVisibleColumns(sectionNames);
-    setTempVisibleColumns(sectionNames);
-  }, [sectionNames]);
-  
-  if (!tableData || tableData.length === 0) {
+
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: 'asc',
+  });
+
+  if (!data || data.length === 0) {
     return <p>No data available</p>;
   }
 
-  const getApplicantName = (resume) => resume?.replace('.json', '') || 'Unknown';
+  const getApplicantName = (resume) => {
+    return resume.replace('.json', '');
+  };
+
+  const sectionNames = Object.keys(data[0].section_scores);
 
   const handleEditClick = (rowIndex, event) => {
     const row = event.target.closest('tr');
     const rect = row.getBoundingClientRect();
     setModalPosition({
-      top: rect.top + window.scrollY,
-      left: rect.left + window.scrollX + rect.width + 10,
+      top: rect.bottom + window.scrollY + 10,
+      left: rect.left + window.scrollX,
     });
     setCurrentRowIndex(rowIndex);
-    setEditedDecision(tableData[rowIndex].decision);
     setIsModalOpen(true);
-  };
-
-  const handleSaveDecision = () => {
-    const updatedData = [...tableData];
-    updatedData[currentRowIndex].decision = editedDecision;
-    setTableData(updatedData);
-    setIsModalOpen(false);
   };
 
   const handleSort = (key) => {
@@ -74,14 +38,6 @@ const TableComponent = ({ data }) => {
     }
     setSortConfig({ key, direction });
   };
-
-  const renderSortArrow = (key) => {
-    if (sortConfig.key === key) {
-      return sortConfig.direction === 'asc' ? ' ▲' : ' ▼';
-    }
-    return ' ⇅';
-  };
-  
   const handleDownloadExcel = () => {
     if (!tableData || tableData.length === 0) {
       alert('No data available to export.');
@@ -107,30 +63,34 @@ const TableComponent = ({ data }) => {
     const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
     saveAs(blob, 'matched_cvs.xlsx');
   };
-  
-  const sortedData = [...tableData].sort((a, b) => {
+  const sortedData = [...data].sort((a, b) => {
     if (!sortConfig.key) return 0;
-    
-    const valA = sortConfig.key === 'total_score'
-      ? a.total_score
-      : a.section_scores?.[sortConfig.key];
-    const valB = sortConfig.key === 'total_score'
-      ? b.total_score
-      : b.section_scores?.[sortConfig.key];
+
+    const valA =
+      sortConfig.key === 'total_score'
+        ? a.total_score
+        : a.section_scores[sortConfig.key];
+    const valB =
+      sortConfig.key === 'total_score'
+        ? b.total_score
+        : b.section_scores[sortConfig.key];
 
     if (typeof valA === 'number' && typeof valB === 'number') {
       return sortConfig.direction === 'asc' ? valA - valB : valB - valA;
     }
 
     return sortConfig.direction === 'asc'
-      ? String(valA || '').localeCompare(String(valB || ''))
-      : String(valB || '').localeCompare(String(valA || ''));
+      ? String(valA).localeCompare(String(valB))
+      : String(valB).localeCompare(String(valA));
   });
 
-  const filteredData = sortedData.filter(item => {
-    if (decisionFilter === 'All') return true;
-    return item.decision === decisionFilter;
-  });
+  const renderSortArrow = (key) => {
+    if (sortConfig.key === key) {
+      return sortConfig.direction === 'asc' ? ' ▲' : ' ▼';
+    }
+    return ' ⇅';
+  };
+  
 
   return (
     <section style={{ padding: '20px' }}>
@@ -233,7 +193,7 @@ const TableComponent = ({ data }) => {
                 <td style={cellStyle}>{getApplicantName(item.resume)}</td>
                 {visibleColumns.map((section, colIndex) => (
                   <td key={colIndex} style={cellStyle}>
-                    {item.section_scores?.[section]}
+                    {item.section_scores[section]}
                   </td>
                 ))}
                 <td style={cellStyle}>{item.total_score}</td>
@@ -295,19 +255,7 @@ const TableComponent = ({ data }) => {
                       color: '#007BFF',
                     }}
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                    </svg>
+                    <img src="/images/edit_icon.png" alt="Pen" />
                   </span>
                 </td>
               </tr>
@@ -416,7 +364,6 @@ const TableComponent = ({ data }) => {
           </div>
         </div>
       )}
-
     </section>
   );
 };
@@ -433,7 +380,7 @@ const cellStyle = {
   padding: '10px',
   paddingTop: '20px',
   paddingBottom: '20px',
-  border: '0.5px solid #ddd',
+  border: '1px solid #ddd',
   textAlign: 'center',
 };
 
@@ -441,6 +388,27 @@ const badgeStyle = {
   padding: '5px 10px',
   borderRadius: '15px',
   fontWeight: 'bold',
+};
+
+const getDecisionColor = (score) => {
+  if (score >= 80) return '#E9FFEF';
+  if (score >= 70) return '#FFF2DD';
+  if (score < 70) return '#FFDDDD';
+  return '#FFF';
+};
+
+const getTextColor = (score) => {
+  if (score >= 80) return '#008D36';
+  if (score >= 70) return '#D98634';
+  if (score < 70) return '#E30613';
+  return '#000';
+};
+
+const getDecisionText = (score) => {
+  if (score >= 80) return '● Accepted';
+  if (score >= 70) return '● Pending';
+  if (score < 70) return '● Shortlisted';
+  return 'Unknown';
 };
 
 const getRowStyle = (rowIndex) => {

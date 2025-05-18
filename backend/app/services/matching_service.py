@@ -1,20 +1,28 @@
 import traceback
 import httpx
+
+from ..models.job import JobPosting
+from fastapi import APIRouter, HTTPException, Body, Depends, File, UploadFile
+
 from ..config import RESULTS_FILE
-from ..utils.file_utils import save_json_file, load_json_file
+
+from ..utils.file_utils import save_json_file, load_json_file, list_json_files
 from typing import Dict, Any
 import datetime
 import uuid
 from ..config import DATA_DIR
+from datetime import datetime
 
 class MatchingService:
     def __init__(self):
         self.results_file = RESULTS_FILE
         self.api_url = "http://127.0.0.1:8000"  # Make sure this is the correct URL
         self.cv_files_dir = DATA_DIR / "Resumes"
+        self.weights = DATA_DIR / "Weights"
 
-    
+
     async def get_matched_cvs(self) -> dict[str, Any]:
+
         """Get matched CVs by triggering /process-data and /rank-resumes."""
         timeout = httpx.Timeout(None)  # No timeout
         async with httpx.AsyncClient(timeout=timeout) as client:
@@ -27,8 +35,36 @@ class MatchingService:
                 if process_response.status_code != 200:
                     return {"success": False, "message": "Failed to process data."}
                 
-                print("[DEBUG] Step 2: Sending request to /rank-resumes...")
-                rank_response = await client.get(f"{self.api_url}/rank-resumes/")
+                 # Step 2: Load weights from the JSON files in the directory
+                weights_data_list = list_json_files(self.weights)
+                if not weights_data_list:
+                    return {"success": False, "message": "No weights files found."}
+
+                # Get the most recently modified file
+                latest_weights_data = max(weights_data_list, key=lambda x: x.get("timestamp", 0))  # Assuming `timestamp` is available or use file timestamps
+
+                weights_raw = latest_weights_data.get("weights", {})
+                print("[DEBUG] Loaded weights from file:", weights_raw)
+
+                # Normalize the weights
+                total = sum(weights_raw.values())
+
+                if total == 0:
+                    return {"success": False, "message": "Invalid weights in job offer."}
+
+                # Normalize weights to sum to 1
+                weights = {
+                    "education": weights_raw.get("education", 0) / total,
+                    "experience": weights_raw.get("experience", 0) / total,
+                    "skills": weights_raw.get("skills", 0) / total,
+                    "mission": weights_raw.get("jobDescription", 0) / total,
+                }
+
+                print("[DEBUG] Normalized weights to send:", weights)
+
+                # Step 3: Sending request to /rank-resumes with weights
+                print("[DEBUG] Step 3: Sending request to /rank-resumes with weights...")
+                rank_response = await client.get(f"{self.api_url}/rank-resumes/", params=weights)
                 print("[DEBUG] /rank-resumes status code:", rank_response.status_code)
                 print("[DEBUG] /rank-resumes response body:\n", rank_response.text)
 
@@ -69,9 +105,8 @@ class MatchingService:
                 save_json_file(self.results_file, results)
                 print("Results saved to:", self.results_file)
 
+
                 # Return the results
-                return results
-            
             except httpx.RequestError as e:
                 print("[ERROR] Request error occurred!")
                 traceback.print_exc()
@@ -80,6 +115,9 @@ class MatchingService:
                 print("[ERROR] Unexpected error occurred!")
                 traceback.print_exc()
                 return {"success": False, "message": f"Unexpected error: {general_error}"}
+            
+        return load_json_file(self.results_file)
+            
                 
     def update_weights(self, weights: Dict[str, float]) -> Dict[str, Any]:
         """Update weights for the matching algorithm"""
@@ -98,26 +136,5 @@ class MatchingService:
         from ..utils.file_utils import save_base64_file
         save_base64_file(self.cv_files_dir, filename, cv_data["content"])
 
-        # Load existing results or initialize
-        if self.results_file.exists():
-            results = load_json_file(self.results_file)
-        else:
-            results = {"job_description": "", "ranking": []}
-
-        # Append a dummy ranking entry (or trigger a matching function)
-        results["ranking"].append({
-            "resume": filename,
-            "total_score": 0.0,  # Placeholder, real scoring happens elsewhere
-            "section_scores": {
-                "Education": 0.0,
-                "Work Experience": 0.0,
-                "Skills": 0.0,
-                "Experience_Requirements": 0.0
-            },
-            "addedAt": datetime.datetime.now().isoformat()
-        })
-
-        # Save updated results
-        save_json_file(self.results_file, results)
 
         return {"status": "success", "filename": filename}
