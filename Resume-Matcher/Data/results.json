@@ -1,0 +1,15 @@
+{
+  "job_description": "job_description_filename.json",
+  "ranking": [
+    {
+      "resume": "--BILEK Aissa_cf469843.json",
+      "total_score": 68.23,
+      "section_scores": {
+        "Education": 87.49,
+        "Skills": 82.49,
+        "Work Experience": 78.33,
+        "Mission": 83.29
+      }
+    }
+  ]
+}
