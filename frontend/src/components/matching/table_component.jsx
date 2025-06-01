@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -30,17 +30,32 @@ const TableComponent = ({ data }) => {
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [editedDecision, setEditedDecision] = useState('');
-  const sectionNames = tableData && tableData.length > 0 ? Object.keys(tableData[0].section_scores || {}) : [];
   const [decisionFilter, setDecisionFilter] = useState('All');
-  const [visibleColumns, setVisibleColumns] = useState(sectionNames);
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
-  const [tempVisibleColumns, setTempVisibleColumns] = useState(visibleColumns);
   
-  // Update visibleColumns when sectionNames change
+  // Memoize sectionNames to prevent unnecessary recalculations
+  const sectionNames = useMemo(() => {
+    return tableData && tableData.length > 0 ? Object.keys(tableData[0].section_scores || {}) : [];
+  }, [tableData]);
+  
+  // Initialize visibleColumns state properly
+  const [visibleColumns, setVisibleColumns] = useState([]);
+  const [tempVisibleColumns, setTempVisibleColumns] = useState([]);
+  
+  // Update visibleColumns only when sectionNames is first populated or changes significantly
   useEffect(() => {
-    setVisibleColumns(sectionNames);
-    setTempVisibleColumns(sectionNames);
-  }, [sectionNames]);
+    if (sectionNames.length > 0 && visibleColumns.length === 0) {
+      // Only set initial state if visibleColumns is empty
+      setVisibleColumns(sectionNames);
+      setTempVisibleColumns(sectionNames);
+    } else if (sectionNames.length > 0 && visibleColumns.length > 0) {
+      // Update tempVisibleColumns to include new sections but preserve existing visibility choices
+      const newSections = sectionNames.filter(section => !visibleColumns.includes(section));
+      if (newSections.length > 0) {
+        setTempVisibleColumns(prev => [...prev, ...newSections]);
+      }
+    }
+  }, [sectionNames]); // Only depend on sectionNames
   
   if (!tableData || tableData.length === 0) {
     return <p>No data available</p>;
@@ -148,7 +163,8 @@ const TableComponent = ({ data }) => {
           </select>
           <button
             onClick={() => {
-              setTempVisibleColumns(visibleColumns);
+              // Make sure tempVisibleColumns reflects current state
+              setTempVisibleColumns([...visibleColumns]);
               setIsColumnModalOpen(true);
             }}
             style={{ padding: '6px 12px', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer' }}
@@ -405,7 +421,7 @@ const TableComponent = ({ data }) => {
               </button>
               <button
                 onClick={() => {
-                  setVisibleColumns(tempVisibleColumns);
+                  setVisibleColumns([...tempVisibleColumns]);
                   setIsColumnModalOpen(false);
                 }}
                 className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
