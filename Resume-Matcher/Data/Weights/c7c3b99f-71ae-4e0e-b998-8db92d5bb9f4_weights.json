@@ -1,0 +1,10 @@
+{
+  "jobId": "c7c3b99f-71ae-4e0e-b998-8db92d5bb9f4",
+  "weights": {
+    "experience": 20,
+    "jobDescription": 30,
+    "education": 40,
+    "skills": 10
+  },
+  "timestamp": 1748811381.441504
+}
