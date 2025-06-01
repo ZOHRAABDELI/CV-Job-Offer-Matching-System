@@ -64,16 +64,24 @@ async def rank(
             "Skills": skills,
             "Mission": mission
         }
-        print("[DEBUG] Loaded weights from api:", weights)
-        # Optional: Normalize weights if necessary
+        print("[DEBUG] Loaded weights from API:", weights)
+
         total = sum(weights.values())
-        if total != 1.0:
+        if total == 0:
+            raise HTTPException(status_code=400, detail="Total of weights is zero.")
+
+        # Only normalize if it's clearly not already normalized
+        if total > 1.001 or total < 0.999:
             weights = {k: v / total for k, v in weights.items()}
+            print("[DEBUG] Normalized weights:", weights)
+        else:
+            print("[DEBUG] Weights already normalized.")
 
         ranking = rank_resumes(weights=weights)
         return JSONResponse(content=ranking)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # Route to process resumes and job descriptions into JSON format
 @app.post("/process-data/")

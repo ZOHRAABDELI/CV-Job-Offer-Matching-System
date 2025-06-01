@@ -2,13 +2,13 @@
   "job_description": "job_description_filename.json",
   "ranking": [
     {
-      "resume": "--BILEK Aissa_cf469843.json",
-      "total_score": 68.23,
+      "resume": "f2fe9b07-c78e-4d0a-b051-07902f7eb369_--ILES Walid.json",
+      "total_score": 72.712,
       "section_scores": {
-        "Education": 87.49,
-        "Skills": 82.49,
-        "Work Experience": 78.33,
-        "Mission": 83.29
+        "Education": 81.93,
+        "Skills": 0.0,
+        "Work Experience": 77.3,
+        "Mission": 81.6
       }
     }
   ]

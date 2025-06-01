@@ -12,6 +12,7 @@ import datetime
 import uuid
 from ..config import DATA_DIR
 from datetime import datetime
+from copy import deepcopy
 
 class MatchingService:
     def __init__(self):
@@ -19,13 +20,59 @@ class MatchingService:
         self.api_url = "http://127.0.0.1:8000"  # Make sure this is the correct URL
         self.cv_files_dir = DATA_DIR / "Resumes"
         self.weights = DATA_DIR / "Weights"
+    
+    def recalculate_total_scores(self) -> None:
+
+        # Load files
+        results = load_json_file(self.results_file)
+        weights_data_list = list_json_files(self.weights)
+
+        if not weights_data_list:
+            print("[ERROR] No weights files found.")
+            return
+
+        latest_weights_data = max(weights_data_list, key=lambda x: x.get("timestamp", 0))
+        raw_weights = latest_weights_data.get("weights", {})
+
+        # Normalize weights
+        raw_edu = float(raw_weights.get("education", 0))
+        raw_exp = float(raw_weights.get("experience", 0))
+        raw_skill = float(raw_weights.get("skills", 0))
+        raw_mission = float(raw_weights.get("jobDescription", 0))
+
+        total = raw_edu + raw_exp + raw_skill + raw_mission
+        if total == 0:
+            print("[ERROR] Weights total is zero. Cannot recalculate.")
+            return
+
+        normalized_weights = {
+            "Education": raw_edu / total,
+            "Work Experience": raw_exp / total,
+            "Skills": raw_skill / total,
+            "Mission": raw_mission / total,
+        }
+
+        print("[DEBUG] Normalized Weights:", normalized_weights)
+
+        updated_results = deepcopy(results)
+        for entry in updated_results.get("ranking", []):
+            section_scores = entry.get("section_scores", {})
+            total_score = 0.0
+
+            for section, weight in normalized_weights.items():
+                section_score = section_scores.get(section, 0)
+                total_score += section_score * weight
+
+            entry["total_score"] = round(total_score, 3)
+
+        # Save updated results
+        save_json_file(self.results_file, updated_results)
+        print("[INFO] Total scores updated and saved to:", self.results_file)
 
 
     async def get_matched_cvs(self) -> dict[str, Any]:
         """Get matched CVs by triggering /process-data and /rank-resumes."""
-        # Return saved results
-        return load_json_file(self.results_file)
-        """timeout = httpx.Timeout(None)  # No timeout
+        timeout = httpx.Timeout(None)  # No timeout
         async with httpx.AsyncClient(timeout=timeout) as client:
             try:
                 # Step 1: Trigger data processing
@@ -125,9 +172,10 @@ class MatchingService:
                 return {"success": False, "message": f"Unexpected error: {general_error}"}
 
         # Return saved results
-        return load_json_file(self.results_file)"""
+        self.recalculate_total_scores()
+        return load_json_file(self.results_file)
 
-                
+
     def update_weights(self, weights: Dict[str, float]) -> Dict[str, Any]:
         """Update weights for the matching algorithm"""
         # Here you would update the weights in your matching algorithm
