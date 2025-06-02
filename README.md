@@ -1,133 +1,158 @@
 
-# Resume Matcher
+# Resume Matcher: CV Matching Platform for Mobilis HR
+
+## Project Overview
+
+Resume Matcher is a CV matching platform designed for Mobilis HR to streamline and automate the process of filtering through CVs. This system leverages advanced Natural Language Processing (NLP) models, including Qwen (`microsoft/phi-3.5-mini-128k-instruct`), to efficiently compare job descriptions (JDs) with resumes (CVs) and rank candidates based on suitability, skills, and experience.
 
 ---
 
-## Overview
+### Purpose
 
-Resume Matcher is a CV matching platform designed for Mobilis HR to streamline and automate the process of filtering through CVs. This system leverages advanced NLP models including **Qwen** and **BAAI’s bge-base-en**, combined with **Apache Tika** for document parsing, to extract meaningful insights and rank candidates efficiently.
+The CV & JD Matching System aims to assist recruiters and hiring managers in automating the candidate selection process by leveraging NLP technologies. It enables recruiters to efficiently compare job descriptions (JDs) with resumes (CVs) and rank candidates based on suitability, skills, and experience.
 
 ---
 
-## Installation and Setup
 
-### 1. Clone the Repository
+### Product Functions
 
-```bash
-git clone <repository_url>
-cd Resume-Matcher
-````
+* **Recruiter Dashboard**: Provides a centralized view for recruiters to manage candidate rankings and upload CVs/JDs.
+* **CV & JD Parsing**: Extracts key data points (skills, experience, education, etc.) from CVs and JDs using NLP.
+* **AI-Powered Matching**: Calculates similarity scores between CVs and JDs using suitable AI techniques.
+* **Candidate Ranking & Scoring**: Ranks candidates based on job fit and customizable weightings (predefined or user-defined).
+* **Bias-Free Mode**: Allows for fair evaluation by hiding personal information from candidate profiles.
 
-### 2. Create a Virtual Environment
+---
 
-```bash
-python -m venv env
-source env/bin/activate  # macOS/Linux
-env\Scripts\activate     # Windows
-```
+## Technologies Used
 
-### 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Run the FastAPI Server
-
-```bash
-uvicorn main:app --reload
-```
-
-The Model API will be available at: `http://127.0.0.1:8000`
-The Backend API will be available at: `http://127.0.0.1:5000`
-API documentation is available at: `http://127.0.0.1:8000/docs`
+* **Frontend**: React / Tailwind CSS
+* **Backend**: FastAPI (Python)
+* **Database**: PostgreSQL
+* **NLP Model**: Qwen (`microsoft/phi-3.5-mini-128k-instruct`)
+* **Other Tools**: Git
 
 ---
 
 ## Project Structure
 
 ```
-frontend/
-backend/
-resume-matcher/
-│── Data/
-│   ├── JobDescription/         # Uploaded job descriptions
-│   ├── Resumes/                # Uploaded resumes
-│   ├── Processed/
-│       ├── JobDescription/      # Processed job descriptions in JSON format
-│       ├── Resumes/             # Processed resumes in JSON format
-│── scripts/                     # Utility scripts
-│── app.log                     # Log file
-│── database.py                 # Database setup (if applicable)
-│── main.py                     # FastAPI application entry point
-│── models.py                   # Data models definitions
-│── schemas.py                  # Pydantic schemas for request/response
-│── services.py                 # Core processing functions (NLP, ranking, etc.)
-│── requirements.txt            # Python dependencies
-│── README.md                   # Project documentation
-│── .gitignore                  # Ignored files
+.
+├── backend
+│   ├── app                    # FastAPI application logic
+│   ├── data                   # (Potentially for temporary data storage)
+│   ├── __pycache__
+│   ├── requirements.txt       # Backend specific Python dependencies
+│   └── run.py                 # Script to run the backend
+├── frontend
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── node_modules           # Frontend dependencies
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── public
+│   ├── README.md
+│   ├── src                    # React application source code
+│   └── vite.config.js
+├── node_modules             
+├── package.json
+├── package-lock.json
+├── README.md                 
+├── requirements.txt           # Consolidated Python dependencies
+└── Resume-Matcher             # Core Resume Matching Engine
+    ├── alembic                # Database migration scripts
+    ├── alembic.ini
+    ├── app.log
+    ├── Data                   # Processed data, including results.json
+    ├── database.py            # Database connection and ORM setup
+    ├── __init__.py
+    ├── main.py                # Main entry point for the Resume Matching Engine
+    ├── models.py              # Database models
+    ├── __pycache__
+    ├── schemas.py             # Pydantic schemas for data validation
+    ├── scripts
+    ├── services.py            # Business logic and service functions
+    ├── test.py
+    └── test_ui_st.py
 ```
 
 ---
 
-## API Usage
-## Model APIs
-### 1. Process Data (Extract & Convert to JSON)
+## How it Works
 
-```http
-POST /process-data/
+When a job offer is created via the UI, it triggers the `getMatchedCVs()` function, which performs the following steps:
+
+1.  **Calls the model via `/process-data/`**: Initiates the CV and JD processing by the Resume Matching Engine.
+2.  **Ranks CVs based on matching**: The NLP model and associated logic analyze and rank the CVs against the provided job description.
+3.  **Waits for results**: The system awaits the completion of the matching process.
+4.  **Saves the results**: The matching results are saved to `Resume-Matcher/Data/results.json`.
+5.  **Sends them back to the UI**: The processed and ranked results are then sent back to the UI for display in a results table.
+
+---
+
+## Setup and Run Instructions
+
+### Prerequisites
+
+* Node.js and npm (for the frontend)
+* Python 3.9+ (recommended)
+* PostgreSQL database
+* An `OPENROUTER_API_KEY` for the Qwen model.
+
+### 1. Environment Variables
+
+Ensure your `OPENROUTER_API_KEY` is configured. For production environments, it's best practice to load this from environment variables rather than hardcoding it.
+
+```python
+QWEN_MODEL = "microsoft/phi-3.5-mini-128k-instruct"
+OPENROUTER_API_KEY = "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" # Load securely in production
+OUTPUT_DIR = Path("../../Data/Processed/Resumes")
 ```
 
-**Description:**
-Uploads and processes resumes and job descriptions using Apache Tika for parsing and the Qwen & BAAI/bge-base-en models for NLP extraction.
+### 2. Install Dependencies
 
-**Response:**
+```bash
+# Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate # On Windows: .\venv\Scripts\activate
 
-```json
-{
-    "message": "Resumes and job descriptions processed successfully."
-}
+# Install all Python dependencies
+pip install -r requirements.txt
+```
+
+### 3. Start the Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 4. Start the FastAPI Backend (UI/API logic)
+
+```bash
+cd backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 5000
+```
+
+### 5. Start the Resume Matching Engine (model + processing)
+
+```bash
+cd Resume-Matcher
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ---
 
-### 2. Rank Resumes
+## Folder Setup and Data Management
 
-```http
-GET /rank-resumes/
-```
-
-**Description:**
-Ranks uploaded resumes against the job descriptions based on matching scores derived from embedding comparisons.
-
-**Response Example:**
-
-```json
-[
-    {"resume": "resume1.pdf", "score": 85},
-    {"resume": "resume2.pdf", "score": 72}
-]
-```
-
----
-
-### 3. Clean All Uploaded and Processed Data
-
-```http
-DELETE /clean_data/
-```
-
-**Description:**
-Deletes all uploaded resumes, job descriptions, and processed JSON data to reset the system.
-
-**Response:**
-
-```json
-{
-    "message": "All uploaded and processed files have been deleted successfully."
-}
-```
-
----
+* **`Resume-Matcher/Data/`**: This directory stores CVs and results after new CVs are added and processed.
+* **`jobDescription/`**: This temporary folder stores job offers after creation via the UI.
+    * **Important**: For the model to function correctly, job offers should ideally be moved to `Resume-Matcher/Data/Job Description/`. You can adjust the route in the application to ensure this happens automatically, or manually move the files for testing.
+* **Model Expectation**: The core matching model expects job offers to be located in `Resume-Matcher/Data/Job Description/`. A sample JD PDF is provided there for testing.
 
 
+
+## Dependencies
+
+The `requirements.txt` file lists all necessary Python dependencies, categorized for clarity.
