@@ -3,7 +3,7 @@
 
 ## Project Overview
 
-Resume Matcher is a CV matching platform designed for Mobilis HR to streamline and automate the process of filtering through CVs. This system leverages advanced Natural Language Processing (NLP) models, including Qwen (`microsoft/phi-3.5-mini-128k-instruct`), to efficiently compare job descriptions (JDs) with resumes (CVs) and rank candidates based on suitability, skills, and experience.
+Resume Matcher is a CV matching platform designed for Mobilis HR to streamline and automate the process of filtering through CVs. This system leverages advanced Natural Language Processing (NLP) models, including Qwen (`Qwen/Qwen 2.5 7B Instruct`), to efficiently compare job descriptions (JDs) with resumes (CVs) and rank candidates based on suitability, skills, and experience.
 
 ---
 
@@ -29,7 +29,7 @@ The CV & JD Matching System aims to assist recruiters and hiring managers in aut
 * **Frontend**: React / Tailwind CSS
 * **Backend**: FastAPI (Python)
 * **Database**: PostgreSQL
-* **NLP Model**: Qwen (`Qwen/Qwen 2.5 7B Instruc`)
+* **NLP Model**: Qwen (`Qwen/Qwen 2.5 7B Instruct`)
 * **Other Tools**: Git
 
 ---
@@ -104,7 +104,7 @@ When a job offer is created via the UI, it triggers the `getMatchedCVs()` functi
 Ensure your `OPENROUTER_API_KEY` is configured. For production environments, it's best practice to load this from environment variables rather than hardcoding it.
 
 ```python
-QWEN_MODEL = "microsoft/phi-3.5-mini-128k-instruct"
+QWEN_MODEL = "Qwen/Qwen 2.5 7B Instruct"
 OPENROUTER_API_KEY = "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" # Load securely in production
 OUTPUT_DIR = Path("../../Data/Processed/Resumes")
 ```
