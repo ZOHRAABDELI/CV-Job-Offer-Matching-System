@@ -14,8 +14,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Constants
-QWEN_MODEL = "qwen/qwen-2.5-7b-instruct"
-OPENROUTER_API_KEY = "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" # put your API
+QWEN_MODEL = "microsoft/phi-3.5-mini-128k-instruct"
+OPENROUTER_API_KEY = "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" # put your API
 OUTPUT_DIR = Path("../../Data/Processed/Resumes")
 
 class ParseResume:
@@ -39,8 +39,8 @@ class ParseResume:
             content = parsed.get("content", "")
             
             # Log warning if document is very long
-            if content and len(content) > 300000:
-                logger.warning(f"Very long document ({len(content)} chars), may exceed token limits")
+            #if content and len(content) > 300000:
+            #    logger.warning(f"Very long document ({len(content)} chars), may exceed token limits")
                 
             return content.strip() if content else ""
         except Exception as e:
