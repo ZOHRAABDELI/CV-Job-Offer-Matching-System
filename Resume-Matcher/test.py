@@ -72,8 +72,8 @@ def test_openrouter_connection():
 if __name__ == "__main__":
     success, response = test_openrouter_connection()
     if success:
-        print("✅ API test successful!")
+        print("API test successful!")
         print(f"Model response: {response}")
     else:
-        print("❌ API test failed!")
+        print("API test failed!")
         print(f"Error: {response}")
