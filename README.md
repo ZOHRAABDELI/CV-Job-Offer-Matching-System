@@ -38,7 +38,8 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-The API will be available at: `http://127.0.0.1:8000`
+The Model API will be available at: `http://127.0.0.1:8000`
+The Backend API will be available at: `http://127.0.0.1:5000`
 API documentation is available at: `http://127.0.0.1:8000/docs`
 
 ---
@@ -46,6 +47,8 @@ API documentation is available at: `http://127.0.0.1:8000/docs`
 ## Project Structure
 
 ```
+frontend/
+backend/
 resume-matcher/
 │── Data/
 │   ├── JobDescription/         # Uploaded job descriptions
@@ -68,7 +71,7 @@ resume-matcher/
 ---
 
 ## API Usage
-
+## Model APIs
 ### 1. Process Data (Extract & Convert to JSON)
 
 ```http
