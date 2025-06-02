@@ -29,7 +29,7 @@ The CV & JD Matching System aims to assist recruiters and hiring managers in aut
 * **Frontend**: React / Tailwind CSS
 * **Backend**: FastAPI (Python)
 * **Database**: PostgreSQL
-* **NLP Model**: Qwen (`microsoft/phi-3.5-mini-128k-instruct`)
+* **NLP Model**: Qwen (`Qwen/Qwen 2.5 7B Instruc`)
 * **Other Tools**: Git
 
 ---
